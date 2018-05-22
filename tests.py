@@ -27,6 +27,43 @@ assert(not t0.get_spells())
 assert(not t0.get_spell_slots())
 
 try:
+    t1 = combatant.Combatant(name="bob")
+    raise Exception("Create combatant succeeded without ability scores")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded without AC")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(ac=18, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded without max hp")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8)
+    raise Exception("Create combatant succeeded without name")
+except ValueError:
+    pass
+
+t2 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+assert(t2.can_see("normal"))
+assert(not t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.add_condition("blinded")
+assert(not t2.can_see("normal"))
+assert(not t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+
+try:
     weapon = weapons.Weapon(name='weapon')
     raise Exception("Create weapon succeeded without damage dice")
 except ValueError:

@@ -18,6 +18,7 @@ skill_proficiencies (add later)
 spells (add later)
 features (add later)
 """
+import warnings
 import weapons
 
 
@@ -31,9 +32,19 @@ def ability_to_mod(score):
 class Combatant:
     def __init__(self, **kwargs):
         self._ac = kwargs.get('ac')
+        if not self._ac:
+            raise ValueError("Must provide ac")
         self._max_hp = kwargs.get('max_hp')
-        self._temp_hp = kwargs.get('temp_hp')
-        self._current_hp = kwargs.get('current_hp')
+        if not self._max_hp or self._max_hp <= 0:
+            raise ValueError("Must provide positive max hp")
+        self._temp_hp = kwargs.get('temp_hp', 0)
+
+        self._conditions = kwargs.get('conditions', [])  # set this first in case current hp makes character unconscious
+
+        self._current_hp = kwargs.get('current_hp', 0)
+        if self._current_hp == 0:
+            warnings.warn("Combatant created with 0 hp.")
+            self.become_unconscious()
         self._hit_dice = kwargs.get('hit_dice')
         self._speed = kwargs.get('speed', 25)
         self._vision = kwargs.get('vision', 'normal')
@@ -41,17 +52,34 @@ class Combatant:
             print("%s not recognized as a valid vision. Setting vision to normal." % self._vision)
             self._vision = "normal"
 
-        self._strength = ability_to_mod(kwargs.get('strength'))
-        self._dexterity = ability_to_mod(kwargs.get('dexterity'))
-        self._constitution = ability_to_mod(kwargs.get('constitution'))
-        self._intelligence = ability_to_mod(kwargs.get('intelligence'))
-        self._wisdom = ability_to_mod(kwargs.get('wisdom'))
-        self._charisma = ability_to_mod(kwargs.get('charisma'))
+        strength = kwargs.get('strength')
+        if not strength:
+            raise ValueError("Must provide strength score")
+        self._strength = ability_to_mod(strength)
+        dexterity = kwargs.get('dexterity')
+        if not dexterity:
+            raise ValueError("Must provide dexterity score")
+        self._dexterity = ability_to_mod(dexterity)
+        constitution = kwargs.get('constitution')
+        if not constitution:
+            raise ValueError("Must provide constitution score")
+        self._constitution = ability_to_mod(constitution)
+        intelligence = kwargs.get('intelligence')
+        if not intelligence:
+            raise ValueError("Must provide intelligence score")
+        self._intelligence = ability_to_mod(intelligence)
+        wisdom = kwargs.get('wisdom')
+        if not wisdom:
+            raise ValueError("Must provide wisdom score")
+        self._wisdom = ability_to_mod(wisdom)
+        charisma = kwargs.get('charisma')
+        if not charisma:
+            raise ValueError("Must provide charisma score")
+        self._charisma = ability_to_mod(charisma)
         self._proficiencies = kwargs.get('proficiencies', {})  # TODO: implement
         self._features = kwargs.get('features', [])  # TODO: implement
 
         self._death_saves = kwargs.get('death_saves', [])
-        self._conditions = kwargs.get('conditions', [])
 
         self._weapons = kwargs.get('weapons', [])
         self._items = kwargs.get('items', [])  # TODO: implement
@@ -63,6 +91,8 @@ class Combatant:
         #     self._attacks.extend(weapon.getAttacks())
 
         self._name = kwargs.get('name')
+        if not self._name:
+            raise ValueError("Must provide a name")
 
     def get_ac(self):
         return self._ac
@@ -90,12 +120,12 @@ class Combatant:
 
     def can_see(self, light_src):
         if "blinded" in self._conditions:
-            return False
+            return self._vision == "blindsense" and light_src != "magic"
         if light_src == "normal":
             return True
         if self._vision == "normal":  # normal vision can't see anything better than normal light
             return False
-        if light_src == "darkvision":  # darkvision, blindsight, and truesight can all see in the dark
+        if light_src == "dark":  # darkvision, blindsight, and truesight can all see in the dark
             return True
         if light_src == "magic":
             return self._vision == "truesight"
@@ -157,3 +187,9 @@ class Combatant:
         self._weapons.append(weapon)
         weapon.set_owner(self)
 
+    def add_condition(self, condition):
+        # TODO: validate condition
+        self._conditions.append(condition)
+
+    def become_unconscious(self):
+        warnings.warn("Not implemented yet")  # TODO: become unconscious
