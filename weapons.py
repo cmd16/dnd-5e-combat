@@ -39,6 +39,13 @@ class Weapon:
             props.append("two_handed")
         elif self._versatile:
             props.append("versatile")
+        return props
+
+    def get_range(self):
+        return self._range
+
+    def get_melee_range(self):
+        return self._melee_range
 
     def get_damage_dice(self):
         return self._damage_dice

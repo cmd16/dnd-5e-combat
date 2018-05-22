@@ -124,6 +124,15 @@ class Combatant:
     def get_features(self):
         return self._features
 
+    def get_death_saves(self):
+        return self._death_saves
+
+    def get_conditions(self):
+        return self._conditions
+
+    def has_condition(self, condition):
+        return condition in self._conditions
+
     def get_weapons(self):
         return self._weapons
 
