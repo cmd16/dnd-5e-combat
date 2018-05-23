@@ -1,3 +1,5 @@
+from utility_methods_dnd import validate_dice
+
 class Weapon:
     def __init__(self, **kwargs):
         self._finesse = kwargs.get('finesse', 0)
@@ -11,13 +13,13 @@ class Weapon:
         self._reach = kwargs.get('reach', 0)
         self._two_handed = kwargs.get('two_handed', 0)
         self._versatile = kwargs.get('versatile', 0)
-        self._damage_dice = kwargs.get('damage_dice')
-        if not self._damage_dice:
-            raise ValueError("Must provide damage dice")
+        self._damage_dice = validate_dice(kwargs.get('damage_dice'))
         self._name = kwargs.get('name')  # needed for verbose output
         if not self._name:
             raise ValueError("Must provide name")
         self._owner = kwargs.get('owner', None)
+        self._hit_bonus = kwargs.get('hit_bonus', 0)
+        self._damage_bonus = kwargs.get('damage_bonus', 0)
 
     def get_properties(self):
         props = []

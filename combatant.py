@@ -20,26 +20,32 @@ features (add later)
 """
 import warnings
 import weapons
-from utility_methods_dnd import ability_to_mod
+from utility_methods_dnd import ability_to_mod, validate_dice
 
 class Combatant:
     def __init__(self, **kwargs):
         self._ac = kwargs.get('ac')
-        if not self._ac:  # TODO: include threshold
-            raise ValueError("Must provide ac")
+        if not self._ac or not isinstance(self._ac, int):  # TODO: include threshold
+            raise ValueError("Must provide ac as an integer")
         self._max_hp = kwargs.get('max_hp')
-        if not self._max_hp or self._max_hp <= 0:
+        if not self._max_hp or not isinstance(self._max_hp, int) or self._max_hp <= 0:
             raise ValueError("Must provide positive max hp")
         self._temp_hp = kwargs.get('temp_hp', 0)
 
         self._conditions = kwargs.get('conditions', [])  # set this first in case current hp makes character unconscious
+        if not isinstance(self._conditions, list):
+            raise ValueError("Must provide a list for conditions")
 
         self._current_hp = kwargs.get('current_hp', 0)
-        if self._current_hp == 0:
-            warnings.warn("Combatant created with 0 hp.")
+        if not isinstance(self._current_hp, int):
+            raise ValueError("Must provide non-negative integer for current hp")
+        if self._current_hp <= 0:
+            warnings.warn("Combatant created with 0 or less hp.")
             self.become_unconscious()
-        self._hit_dice = kwargs.get('hit_dice')
+        self._hit_dice = validate_dice(kwargs.get('hit_dice'))
         self._speed = kwargs.get('speed', 25)
+        if not isinstance(self._speed, int) or self._speed <= 0:
+            raise ValueError("Speed must be a positive integer")
         self._vision = kwargs.get('vision', 'normal')
         if self._vision not in ['normal', 'darkvision', 'blindsight', 'truesight']:
             print("%s not recognized as a valid vision. Setting vision to normal." % self._vision)
