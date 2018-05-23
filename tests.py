@@ -1,6 +1,8 @@
 import combatant
 import weapons
 
+# testing Combatant construction
+
 t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                          strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name='t0')
 assert(t0.get_name() == 't0')
@@ -53,6 +55,8 @@ try:
 except ValueError:
     pass
 
+# testing Combatant vision
+
 t2 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='normal',
                          strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
 assert(t2.can_see("normal"))
@@ -62,6 +66,40 @@ t2.add_condition("blinded")
 assert(not t2.can_see("normal"))
 assert(not t2.can_see("dark"))
 assert(not t2.can_see("magic"))
+t2.remove_condition("blinded")
+assert("blinded" not in t2.get_conditions())
+
+t2.change_vision("blindsight")
+assert(t2.can_see("normal"))
+assert(t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.add_condition("blinded")
+assert(t2.can_see("normal"))
+assert(t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.remove_condition("blinded")
+
+t2.change_vision("darkvision")
+assert(t2.can_see("normal"))
+assert(t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.add_condition("blinded")
+assert(not t2.can_see("normal"))
+assert(not t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.remove_condition("blinded")
+
+t2.change_vision("truesight")
+assert(t2.can_see("normal"))
+assert(t2.can_see("dark"))
+assert(t2.can_see("magic"))
+t2.add_condition("blinded")
+assert(not t2.can_see("normal"))
+assert(not t2.can_see("dark"))
+assert(not t2.can_see("magic"))
+t2.remove_condition("blinded")
+
+# testing Weapon construction
 
 try:
     weapon = weapons.Weapon(name='weapon')

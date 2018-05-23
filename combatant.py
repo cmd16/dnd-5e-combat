@@ -120,7 +120,7 @@ class Combatant:
 
     def can_see(self, light_src):
         if "blinded" in self._conditions:
-            return self._vision == "blindsense" and light_src != "magic"
+            return self._vision == "blindsight" and light_src != "magic"
         if light_src == "normal":
             return True
         if self._vision == "normal":  # normal vision can't see anything better than normal light
@@ -189,7 +189,17 @@ class Combatant:
 
     def add_condition(self, condition):
         # TODO: validate condition
-        self._conditions.append(condition)
+        if condition not in self._conditions:
+            self._conditions.append(condition)
+
+    def remove_condition(self, condition):
+        try:
+            self._conditions.remove(condition)
+        except ValueError:
+            pass  # TODO: change later?
+
+    def change_vision(self, vision):  # in case of special vision changing magic? also useful for testing
+        self._vision = vision
 
     def become_unconscious(self):
         warnings.warn("Not implemented yet")  # TODO: become unconscious
