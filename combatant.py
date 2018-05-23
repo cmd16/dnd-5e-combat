@@ -20,14 +20,7 @@ features (add later)
 """
 import warnings
 import weapons
-
-
-def ability_to_mod(score):
-    if score < 1:
-        ValueError("Ability score too low (did you input a modifier?)")
-    elif score > 30:
-        ValueError("Ability score too high (did you add an extra digit?)")
-    return (score -10) // 2
+from utility_methods_dnd import ability_to_mod
 
 class Combatant:
     def __init__(self, **kwargs):

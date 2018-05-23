@@ -140,12 +140,12 @@ except ValueError:
     pass
 
 try:
-    weapon = weapons.Weapon(damage_dice='1d4')
+    weapon = weapons.Weapon(damage_dice=(1, 4))
     raise Exception("Create weapon succeeded without name")
 except ValueError:
     pass
 
-dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice="1d4")
+dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice=(1, 4))
 assert(dagger.get_name() == "dagger")
 props = dagger.get_properties()
 assert("finesse" in props)
@@ -154,7 +154,7 @@ assert("range" in props)
 assert(dagger.get_range() == "20/60")
 assert("melee" in props)
 assert(dagger.get_melee_range() == 5)
-assert(dagger.get_damage_dice() == "1d4")
+assert(dagger.get_damage_dice() == (1, 4))
 assert("heavy" not in props)
 assert("load" not in props)
 assert("reach" not in props)
