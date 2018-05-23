@@ -67,7 +67,7 @@ assert(not t2.can_see("normal"))
 assert(not t2.can_see("dark"))
 assert(not t2.can_see("magic"))
 t2.remove_condition("blinded")
-assert("blinded" not in t2.get_conditions())
+assert(not t2.has_condition("blinded"))
 
 t2.change_vision("blindsight")
 assert(t2.can_see("normal"))
@@ -98,6 +98,38 @@ assert(not t2.can_see("normal"))
 assert(not t2.can_see("dark"))
 assert(not t2.can_see("magic"))
 t2.remove_condition("blinded")
+
+# testing Combatant damage and healing
+
+t2.take_damage(1)
+# take less than temp hp
+assert(t2.get_temp_hp() == 1)
+assert(t2.get_current_hp() == 5)
+# take more than temp hp
+t2.take_damage(2)
+assert(t2.get_temp_hp() == 0)
+assert(t2.get_current_hp() == 4)
+# take damage to current hp
+t2.take_damage(2)
+assert(t2.get_temp_hp() == 0)
+assert(t2.get_current_hp() == 2)
+# go unconscious but don't die
+t2.take_damage(10)
+assert(t2.get_temp_hp() == 0)
+assert(t2.get_current_hp() == 0)
+assert(t2.has_condition("unconscious"))
+# heal
+t2.take_healing(20)
+assert(t2.get_current_hp() == 20)
+assert(not t2.has_condition("unconscious"))
+# heal above max
+t2.take_healing(40)
+assert(t2.get_current_hp() == t2.get_max_hp() == 30)
+# die
+t2.take_damage(100)  # suuuper dead.
+assert(t2.get_conditions() == ["dead"])
+assert(t2.get_current_hp() == 0)
+assert(t2.get_temp_hp() == 0)
 
 # testing Weapon construction
 
