@@ -217,6 +217,19 @@ assert(t2.get_conditions() == ["dead"])
 assert(t2.get_current_hp() == 0)
 assert(t2.get_temp_hp() == 0)
 
+# testing Creature construction
+c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
+                        cr=1/2, xp=100)
+assert(c0.get_cr() == 1/2)
+assert(c0.get_xp() == 100)
+
+c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
+                        cr=1/4)
+assert(c0.get_cr() == 1/4)
+assert(c0.get_xp() == 50)
+
 # testing Weapon construction
 
 try:

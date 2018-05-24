@@ -20,7 +20,7 @@ features (add later)
 """
 import warnings
 import weapons
-from utility_methods_dnd import ability_to_mod, validate_dice
+from utility_methods_dnd import ability_to_mod, validate_dice, cr_to_xp
 
 class Combatant:
     def __init__(self, **kwargs):
@@ -238,3 +238,17 @@ class Combatant:
         self._conditions = ["dead"]  # TODO: change death later?
         self._current_hp = 0
         self._temp_hp = 0
+
+class Creature(Combatant):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._cr = kwargs.get("cr", 0)
+        if not isinstance(self._cr, (int, float)) or self._cr <= 0:
+            raise ValueError("Challenge rating must be a non-negative number")
+        self._xp = kwargs.get("xp", cr_to_xp(self._cr))
+
+    def get_cr(self):
+        return self._cr
+
+    def get_xp(self):
+        return self._xp
