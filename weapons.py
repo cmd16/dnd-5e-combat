@@ -8,7 +8,7 @@ class Weapon:
         self._load = kwargs.get('load', 0)
         self._range = kwargs.get('range', 0)  # range is 0 or a tuple. For our purposes it's the same property as thrown
         self._melee_range = kwargs.get('melee_range', 0)
-        if not self._range and not self._melee_range:  # assume it is a melee weapon
+        if not self._range and not self._melee_range:  # assume this is a melee weapon if not otherwise specified
             self._melee_range = 5
         self._reach = kwargs.get('reach', 0)
         self._two_handed = kwargs.get('two_handed', 0)

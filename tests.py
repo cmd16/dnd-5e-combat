@@ -1,5 +1,51 @@
 import combatant
 import weapons
+from utility_methods_dnd import ability_to_mod, validate_dice
+
+# testing utility methods
+try:
+    ability_to_mod(-5)
+    raise Exception("Allowed low ability score")
+except ValueError:
+    pass
+
+try:
+    ability_to_mod(70)
+    raise Exception("Allowed high ability score")
+except ValueError:
+    pass
+
+try:
+    validate_dice(5.2)
+except ValueError:
+    pass
+
+try:
+    validate_dice((1, 2, 3))
+    raise Exception("Allowed list of len != 2")
+except ValueError:
+    pass
+
+try:
+    validate_dice(("a", "b"))
+    raise Exception("Allowed list of non-integers")
+except ValueError:
+    pass
+
+try:
+    validate_dice(("xdz"))
+    raise Exception("Allowed dice with non-integers in string")
+except ValueError:
+    pass
+
+try:
+    validate_dice(("1d4d20"))
+    raise Exception("Allowed dice with multiple d in string")
+except ValueError:
+    pass
+
+assert(validate_dice((2, 3)) == (2, 3))
+assert(validate_dice("3d4") == (3, 4))
 
 # testing Combatant construction
 
@@ -42,6 +88,20 @@ except ValueError:
     pass
 
 try:
+    t1 = combatant.Combatant(ac="10", max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded with non-integer AC")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, conditions="dog",
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded with non-list conditions")
+except ValueError:
+    pass
+
+try:
     t1 = combatant.Combatant(ac=18, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
                          strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
     raise Exception("Create combatant succeeded without max hp")
@@ -49,9 +109,35 @@ except ValueError:
     pass
 
 try:
+    t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=35, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                             strength=9, dexterity=10, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="t1")
+    raise Exception("Create combatant succeeded with current hp greater than max hp")
+except ValueError:
+    pass
+
+t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=-5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                             strength=9, dexterity=10, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="t1")  # should give warning that combatant was created unconscious
+
+try:
     t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
                          strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8)
     raise Exception("Create combatant succeeded without name")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                         strength=-1, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded with low ability score")
+except ValueError:
+    pass
+
+try:
+    t1 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='blindsight',
+                         strength=7, dexterity=50, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+    raise Exception("Create combatant succeeded with high ability score")
 except ValueError:
     pass
 

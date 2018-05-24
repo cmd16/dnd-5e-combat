@@ -3,9 +3,9 @@ import warnings
 
 def ability_to_mod(score):
     if score < 1:
-        ValueError("Ability score too low (did you input a modifier?)")
+        raise ValueError("Ability score too low (did you input a modifier?)")
     elif score > 30:
-        ValueError("Ability score too high (did you add an extra digit?)")
+        raise ValueError("Ability score too high (did you add an extra digit?)")
     return (score -10) // 2
 
 def validate_dice(dice):

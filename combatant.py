@@ -34,14 +34,17 @@ class Combatant:
 
         self._conditions = kwargs.get('conditions', [])  # set this first in case current hp makes character unconscious
         if not isinstance(self._conditions, list):
-            raise ValueError("Must provide a list for conditions")
+            raise ValueError("If conditions provided, must be a list")
 
         self._current_hp = kwargs.get('current_hp', 0)
         if not isinstance(self._current_hp, int):
             raise ValueError("Must provide non-negative integer for current hp")
         if self._current_hp <= 0:
-            warnings.warn("Combatant created with 0 or less hp.")
+            warnings.warn("Combatant created with 0 or less hp. Going unconscious (and setting hp to 0).")
             self.become_unconscious()
+        if self._current_hp > self._max_hp:
+            raise ValueError("Current hp cannot be greater than max hp. Use temp hp if needed.")
+
         self._hit_dice = validate_dice(kwargs.get('hit_dice'))
         self._speed = kwargs.get('speed', 25)
         if not isinstance(self._speed, int) or self._speed <= 0:
