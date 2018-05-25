@@ -50,6 +50,6 @@ def roll_dice(dice_type, num=1, modifier=0, adv=0, critable=0):  # -1 for disadv
     return nat_roll + modifier, crit
 
 def cr_to_xp(cr):
-    if cr == 0:
+    if not cr:
         return 10  # because this is combat simulation, assume these are the ones that have attacks and thus are worth 10xp
     return cr * 200

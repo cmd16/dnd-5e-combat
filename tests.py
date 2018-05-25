@@ -230,6 +230,56 @@ c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d
 assert(c0.get_cr() == 1/4)
 assert(c0.get_xp() == 50)
 
+try:
+    c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
+                        cr="dog")
+    raise Exception("Create Creature succeeded for non-number cr")
+except ValueError:
+    pass
+
+try:
+    c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
+                        cr=-2)
+    raise Exception("Create Creature succeeded for negative cr")
+except ValueError:
+    pass
+
+# testing Character construction
+
+c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                         strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
+                        level=5)
+assert c0.get_level() == 5
+
+try:
+    c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="c0",
+                             level=30)
+    raise Exception("Create Character succeeded with level too high")
+except ValueError:
+    pass
+
+try:
+    c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="c0",
+                             level=-2)
+    raise Exception("Create Character succeeded with level too low")
+except ValueError:
+    pass
+
+try:
+    c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="c0",
+                             level="stuff")
+    raise Exception("Create Character succeeded with non-int level")
+except ValueError:
+    pass
+
 # testing Weapon construction
 
 try:

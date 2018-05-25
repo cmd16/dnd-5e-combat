@@ -252,3 +252,15 @@ class Creature(Combatant):
 
     def get_xp(self):
         return self._xp
+
+class Character(Combatant):
+    def __init__self(self, **kwargs):
+        super().__init__(**kwargs)
+        self._level = kwargs.get("level")
+        if not self._level:
+            raise ValueError("No level provided or level is 0")
+        if not isinstance(self._level, int) or self._level < 1 or self._level > 20:
+            raise ValueError("Level must be an integer between 1 and 20")
+
+    def get_level(self):
+        return self._level
