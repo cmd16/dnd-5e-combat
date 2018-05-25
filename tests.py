@@ -1,6 +1,8 @@
 import combatant
 import weapons
+import attack_class
 from utility_methods_dnd import ability_to_mod, validate_dice
+from nltk import FreqDist
 
 # testing utility methods
 try:
@@ -294,7 +296,8 @@ try:
 except ValueError:
     pass
 
-dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice=(1, 4))
+dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice=(1, 4),
+                        hit_bonus=2, damage_bonus=1)
 assert(dagger.get_name() == "dagger")
 props = dagger.get_properties()
 assert("finesse" in props)
@@ -309,6 +312,8 @@ assert("load" not in props)
 assert("reach" not in props)
 assert("two_handed" not in props)
 assert("versatile" not in props)
+assert(dagger.get_hit_bonus() == 2)
+assert(dagger.get_damage_bonus() == 1)
 
 t0.add_weapon(dagger)
 assert(t0.get_weapons() == [dagger])
@@ -319,3 +324,61 @@ try:
     raise Exception("Add weapon succeeded for non-weapon")
 except ValueError:
     pass
+
+# testing Attack construction
+
+try:
+    a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5.2)
+    raise Exception("Create Attack succeeded with non-int attack mod")
+except ValueError:
+    pass
+
+try:
+    a0 = attack_class.Attack(damage_dice=(1, 8), damage_mod=["fail"])
+    raise Exception("Create Attack succeeded with non-int damage mod")
+except ValueError:
+    pass
+
+try:
+    a0 = attack_class.Attack(damage_dice=(1, 8), name=1)
+    raise Exception("Create Attack succeeded with non-string name")
+except ValueError:
+    pass
+
+a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5, damage_mod=2, name="a0")
+assert(a0.get_damage_dice() == (1, 8))
+assert(a0.get_attack_mod() == 5)
+assert(a0.get_damage_mod() == 2)
+assert(a0.get_name() == "a0")
+
+# testing attack rolls. Basically just make FreqDists and look to see if they check out
+
+# a0 = attack_class.Attack(damage_dice=(1, 8), name="a0")
+#
+# attack_roll_list = []
+# crit_list = []
+# for i in range(10000):
+#     result = a0.roll_attack()
+#     attack_roll_list.append(result[0])
+#     crit_list.append(result[1])
+# attack_roll_freqdist = FreqDist(attack_roll_list)
+# crit_freqdist = FreqDist(crit_list)
+# for key in sorted(attack_roll_freqdist.keys()):
+#     print("%d: %d" % (key, attack_roll_freqdist[key]), end=", ")
+# print()
+# print(crit_freqdist.most_common())
+
+# testing damage rolls (see above)
+
+# a1 = attack_class.Attack(damage_dice=(1, 8), damage_mod=1, name="a1")  # also check out that modifiers work
+#
+# damage_roll_list = []
+# for i in range(10000):
+#     result = a1.roll_damage()
+#     damage_roll_list.append(result[0])
+# damage_roll_freqdist = FreqDist(damage_roll_list)
+# for key in sorted(damage_roll_freqdist.keys()):
+#     print("%d: %d" % (key, damage_roll_freqdist[key]), end=", ")
+# print()
+
+

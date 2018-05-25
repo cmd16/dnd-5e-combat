@@ -47,7 +47,7 @@ def roll_dice(dice_type, num=1, modifier=0, adv=0, critable=0):  # -1 for disadv
             elif nat_roll == 1:
                 crit = -1  # crit fail. WARNING: -1 evaluates to true. Use this method appropriately.
         roll_val += nat_roll
-    return nat_roll + modifier, crit
+    return roll_val + modifier, crit
 
 def cr_to_xp(cr):
     if not cr:

@@ -63,3 +63,9 @@ class Weapon:
 
     def set_owner(self, owner):
         self._owner = owner
+
+    def get_hit_bonus(self):
+        return self._hit_bonus
+
+    def get_damage_bonus(self):
+        return self._damage_bonus

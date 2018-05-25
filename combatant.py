@@ -20,6 +20,7 @@ features (add later)
 """
 import warnings
 import weapons
+import attack_class
 from utility_methods_dnd import ability_to_mod, validate_dice, cr_to_xp
 
 class Combatant:
@@ -81,9 +82,15 @@ class Combatant:
         self._proficiencies = kwargs.get('proficiencies', {})  # TODO: implement
         self._features = kwargs.get('features', [])  # TODO: implement
 
-        self._death_saves = kwargs.get('death_saves', [])
+        self._death_saves = kwargs.get('death_saves', [])  # TODO: implement
 
-        self._weapons = kwargs.get('weapons', [])
+        self._weapons = []
+        weapons = kwargs.get('weapons', [])
+        if not isinstance(weapons, (list, tuple)):
+            raise ValueError("Weapons must be a list or tuple of weapons")  # TODO: test
+        for weapon in weapons:
+            self.add_weapon(weapon)
+
         self._items = kwargs.get('items', [])  # TODO: implement
         self._spells = kwargs.get('spells', [])  # TODO: implement
         self._spell_slots = kwargs.get('spell_slots', [])
@@ -214,6 +221,12 @@ class Combatant:
         self._weapons.append(weapon)
         weapon.set_owner(self)
 
+    def add_weapon_attack(self, weapon):
+        attack_mod = weapon.get_hit_bonus() + self._strength
+        damage_mod = weapon.get_damage_bonus() + self._strength
+        attack = attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+                                     name="%s" % weapon.get_name())
+
     def add_condition(self, condition):
         # TODO: validate condition
         if condition not in self._conditions:
@@ -254,7 +267,7 @@ class Creature(Combatant):
         return self._xp
 
 class Character(Combatant):
-    def __init__self(self, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._level = kwargs.get("level")
         if not self._level:
