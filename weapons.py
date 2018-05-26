@@ -13,6 +13,27 @@ class Weapon:
         self._reach = kwargs.get('reach', 0)
         self._two_handed = kwargs.get('two_handed', 0)
         self._versatile = kwargs.get('versatile', 0)
+
+        self._props = []
+        if self._finesse:
+            self._props.append("finesse")
+        if self._light:
+            self._props.append("light")
+        elif self._heavy:
+            self._props.append("heavy")
+        if self._load:
+            self._props.append("load")
+        if self._range:
+            self._props.append("range")
+        if self._melee_range:
+            self._props.append("melee")
+        if self._reach:
+            self._props.append("reach")
+        if self._two_handed:
+            self._props.append("two_handed")
+        elif self._versatile:
+            self._props.append("versatile")
+
         self._damage_dice = validate_dice(kwargs.get('damage_dice'))
         self._name = kwargs.get('name')  # needed for verbose output
         if not self._name:
@@ -42,6 +63,9 @@ class Weapon:
         elif self._versatile:
             props.append("versatile")
         return props
+
+    def has_prop(self, prop):
+        return prop in self._props
 
     def get_range(self):
         return self._range
