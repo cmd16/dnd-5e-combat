@@ -367,11 +367,15 @@ def test_attack():
     except ValueError:
         pass
 
-    a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5, damage_mod=2, damage_type="piercing", name="a0")
+    a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5, damage_mod=2, damage_type="piercing", range=120, adv=-1,
+                             melee_range=10, name="a0")
     assert(a0.get_damage_dice() == (1, 8))
     assert(a0.get_attack_mod() == 5)
     assert(a0.get_damage_mod() == 2)
     assert(a0.get_damage_type() == "piercing")
+    assert(a0.get_range() == 120)
+    assert(a0.get_melee_range() == 10)
+    assert(a0.get_adv() == -1)
     assert(a0.get_name() == "a0")
 
     # testing attack rolls. Basically just make FreqDists and look to see if they check out

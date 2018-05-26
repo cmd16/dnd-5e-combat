@@ -53,3 +53,14 @@ def cr_to_xp(cr):
     if not cr:
         return 10  # because this is combat simulation, assume these are the ones that have attacks and thus are worth 10xp
     return cr * 200
+
+def calc_advantage(advs):  # Note: does not sanitize input. User must use appropriately
+    sum = 0
+    for adv in advs:
+        sum += adv
+    if sum == 0:
+        return 0
+    if sum > 0:
+        return 1
+    if sum < 0:
+        return -1
