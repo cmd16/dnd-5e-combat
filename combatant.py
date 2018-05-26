@@ -222,10 +222,22 @@ class Combatant:
         weapon.set_owner(self)
 
     def add_weapon_attack(self, weapon):
-        attack_mod = weapon.get_hit_bonus() + self._strength
-        damage_mod = weapon.get_damage_bonus() + self._strength
-        attack = attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
-                                     name="%s" % weapon.get_name())
+        if weapon.has_prop("finesse"):
+            mod = max(self._strength, self._dexterity)
+        else:
+            mod = self._dexterity
+        attack_mod = weapon.get_hit_bonus() + mod
+        damage_mod = weapon.get_damage_bonus() + mod
+        if weapon.get_range():
+            self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+                                     name="%s_range" % weapon.get_name(), damage_type=weapon.get_damage_type(),
+                                                range=weapon.get_range()[0]))
+            self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+                                     name="%s_range_disadvantage" % weapon.get_name(), damage_type=weapon.get_damage_type(),
+                                                range=weapon.get_range()[1], adv=-1))
+        else:
+            self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+                                     name="%s_melee" % weapon.get_name()))
 
     def add_condition(self, condition):
         # TODO: validate condition

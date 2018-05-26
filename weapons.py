@@ -12,7 +12,7 @@ class Weapon:
             self._melee_range = 5
         self._reach = kwargs.get('reach', 0)
         self._two_handed = kwargs.get('two_handed', 0)
-        self._versatile = kwargs.get('versatile', 0)
+        self._versatile = kwargs.get('versatile', 0)  # TODO: implement versatile (deal with damage)
 
         self._props = []
         if self._finesse:
