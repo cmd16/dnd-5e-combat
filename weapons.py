@@ -35,6 +35,9 @@ class Weapon:
             self._props.append("versatile")
 
         self._damage_dice = validate_dice(kwargs.get('damage_dice'))
+        self._damage_type = kwargs.get("damage_type")
+        if not isinstance(self._damage_type, str):
+            raise ValueError("Damage type should be a string")
         self._name = kwargs.get('name')  # needed for verbose output
         if not self._name:
             raise ValueError("Must provide name")
@@ -75,6 +78,9 @@ class Weapon:
 
     def get_damage_dice(self):
         return self._damage_dice
+
+    def get_damage_type(self):
+        return self._damage_type
 
     def get_name(self):
         return self._name

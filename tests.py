@@ -297,7 +297,7 @@ def test_character():
     print("Passed!")
 
 def test_weapon():
-    print("Testing Weapon construction")
+    print("Testing Weapon")
 
     try:
         weapon = weapons.Weapon(name='weapon')
@@ -312,7 +312,7 @@ def test_weapon():
         pass
 
     dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice=(1, 4),
-                            hit_bonus=2, damage_bonus=1)
+                            hit_bonus=2, damage_bonus=1, damage_type="slashing")
     assert(dagger.get_name() == "dagger")
     props = dagger.get_properties()
     assert("finesse" in props)
@@ -330,6 +330,7 @@ def test_weapon():
     assert(dagger.has_prop("finesse"))
     assert(dagger.get_hit_bonus() == 2)
     assert(dagger.get_damage_bonus() == 1)
+    assert(dagger.get_damage_type() == "slashing")
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -409,4 +410,5 @@ def test_attack():
     # print()
     print("Passed!")
 
-test_attack()
+test_weapon()
+# test_attack()
