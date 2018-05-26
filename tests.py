@@ -13,7 +13,7 @@ def test_all():
     test_attack()
 
 def test_utility():
-    # testing utility methods
+    print("Testing utility methods")
     try:
         ability_to_mod(-5)
         raise Exception("Allowed low ability score")
@@ -57,9 +57,10 @@ def test_utility():
 
     assert(validate_dice((2, 3)) == (2, 3))
     assert(validate_dice("3d4") == (3, 4))
+    print("Passed!")
 
 def test_combatant():
-    # testing Combatant construction
+    print("Testing Combatant")
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name='t0')
@@ -197,8 +198,6 @@ def test_combatant():
     assert(not t2.can_see("magic"))
     t2.remove_condition("blinded")
 
-    # testing Combatant damage and healing
-
     t2.take_damage(1)
     # take less than temp hp
     assert(t2.get_temp_hp() == 1)
@@ -228,9 +227,10 @@ def test_combatant():
     assert(t2.get_conditions() == ["dead"])
     assert(t2.get_current_hp() == 0)
     assert(t2.get_temp_hp() == 0)
+    print("Passed!")
 
 def test_creature():
-    # testing Creature construction
+    print("Testing Creature")
     c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
                             cr=1/2, xp=100)
@@ -258,9 +258,10 @@ def test_creature():
         raise Exception("Create Creature succeeded for negative cr")
     except ValueError:
         pass
+    print("Passed!")
 
 def test_character():
-    # testing Character construction
+    print("Testing Character")
 
     c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
@@ -293,9 +294,10 @@ def test_character():
         raise Exception("Create Character succeeded with non-int level")
     except ValueError:
         pass
+    print("Passed!")
 
 def test_weapon():
-    # testing Weapon construction
+    print("Testing Weapon construction")
 
     try:
         weapon = weapons.Weapon(name='weapon')
@@ -342,9 +344,10 @@ def test_weapon():
         raise Exception("Add weapon succeeded for non-weapon")
     except ValueError:
         pass
+    print("Passed!")
 
 def test_attack():
-    # testing Attack construction
+    print("Testing Attack")
 
     try:
         a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5.2)
@@ -364,10 +367,11 @@ def test_attack():
     except ValueError:
         pass
 
-    a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5, damage_mod=2, name="a0")
+    a0 = attack_class.Attack(damage_dice=(1, 8), attack_mod=5, damage_mod=2, damage_type="piercing", name="a0")
     assert(a0.get_damage_dice() == (1, 8))
     assert(a0.get_attack_mod() == 5)
     assert(a0.get_damage_mod() == 2)
+    assert(a0.get_damage_type() == "piercing")
     assert(a0.get_name() == "a0")
 
     # testing attack rolls. Basically just make FreqDists and look to see if they check out
@@ -399,5 +403,6 @@ def test_attack():
     # for key in sorted(damage_roll_freqdist.keys()):
     #     print("%d: %d" % (key, damage_roll_freqdist[key]), end=", ")
     # print()
+    print("Passed!")
 
-
+test_attack()
