@@ -85,6 +85,29 @@ def test_combatant():
     assert(not t0.get_weapons())
     assert(not t0.get_items())
 
+    t10 = combatant.Combatant(copy=t0, name="t10")
+    assert(t10.get_name() == 't10')
+    assert(t10.get_ac() == 12)
+    assert(t10.get_max_hp() == 20)
+    assert(t10.get_current_hp() == 20)
+    assert(t10.get_temp_hp() == 2)
+    assert(t10.get_hit_dice() == (3, 6))
+    assert(t10.get_speed() == 20)
+    assert(t10.get_vision() == 'darkvision')
+    assert(t10.get_strength() == 2)
+    assert(t10.get_dexterity() == 3)
+    assert(t10.get_constitution() == -1)
+    assert(t10.get_intelligence() == 1)
+    assert(t10.get_wisdom() == 0)
+    assert(t10.get_charisma() == -1)
+    assert(not t10.get_proficiencies())
+    assert(not t10.get_features())
+    assert(not t10.get_death_saves())
+    assert(not t10.get_conditions())
+    assert(not t10.get_weapons())
+    assert(not t10.get_items())
+    assert(id(t10) != id(t0))
+
     try:
         t1 = combatant.Combatant(name="bob")
         raise Exception("Create combatant succeeded without ability scores")
@@ -155,7 +178,7 @@ def test_combatant():
     # testing Combatant vision
 
     t2 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='normal',
-                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t1")
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="t2")
     assert(t2.can_see("normal"))
     assert(not t2.can_see("dark"))
     assert(not t2.can_see("magic"))
@@ -314,21 +337,40 @@ def test_weapon():
     assert(dagger.get_name() == "dagger")
     props = dagger.get_properties()
     assert("finesse" in props)
-    assert("light" in props)
-    assert("range" in props)
+    assert(dagger.has_prop("light"))
+    assert(dagger.has_prop("range"))
     assert(dagger.get_range() == (20, 60))
-    assert("melee" in props)
+    assert(dagger.has_prop("melee"))
     assert(dagger.get_melee_range() == 5)
     assert(dagger.get_damage_dice() == (1, 4))
-    assert("heavy" not in props)
-    assert("load" not in props)
-    assert("reach" not in props)
-    assert("two_handed" not in props)
-    assert("versatile" not in props)
-    assert(dagger.has_prop("finesse"))
+    assert(not dagger.has_prop("heavy"))
+    assert(not dagger.has_prop("load"))
+    assert(not dagger.has_prop("reach"))
+    assert(not dagger.has_prop("two_handed"))
+    assert(not dagger.has_prop("versatile"))
     assert(dagger.get_hit_bonus() == 2)
     assert(dagger.get_damage_bonus() == 1)
     assert(dagger.get_damage_type() == "piercing")
+
+    dagger_2 = weapons.Weapon(copy=dagger, name="dagger_2")
+    assert(dagger_2.get_name() == "dagger_2")
+    props = dagger_2.get_properties()
+    assert("finesse" in props)
+    assert(dagger_2.has_prop("light"))
+    assert(dagger_2.has_prop("range"))
+    assert(dagger_2.get_range() == (20, 60))
+    assert(dagger_2.has_prop("melee"))
+    assert(dagger_2.get_melee_range() == 5)
+    assert(dagger_2.get_damage_dice() == (1, 4))
+    assert(not dagger_2.has_prop("heavy"))
+    assert(not dagger_2.has_prop("load"))
+    assert(not dagger_2.has_prop("reach"))
+    assert(not dagger_2.has_prop("two_handed"))
+    assert(not dagger_2.has_prop("versatile"))
+    assert(dagger_2.get_hit_bonus() == 2)
+    assert(dagger_2.get_damage_bonus() == 1)
+    assert(dagger_2.get_damage_type() == "piercing")
+    assert(id(dagger) != id(dagger_2))  # make sure they aren't the same object
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -338,11 +380,34 @@ def test_weapon():
     assert(t0.get_weapons() == [dagger])
     assert(dagger.get_owner() == t0)
 
+    t1 = combatant.Combatant(copy=t0, name="t1")
+    assert(len(t1.get_weapons()) == 1)
+    dagger_3 = t1.get_weapons()[0]
+    assert (dagger_3.get_name() == "dagger")
+    props = dagger_3.get_properties()
+    assert ("finesse" in props)
+    assert (dagger_3.has_prop("light"))
+    assert (dagger_3.has_prop("range"))
+    assert (dagger_3.get_range() == (20, 60))
+    assert (dagger_3.has_prop("melee"))
+    assert (dagger_3.get_melee_range() == 5)
+    assert (dagger_3.get_damage_dice() == (1, 4))
+    assert (not dagger_3.has_prop("heavy"))
+    assert (not dagger_3.has_prop("load"))
+    assert (not dagger_3.has_prop("reach"))
+    assert (not dagger_3.has_prop("two_handed"))
+    assert (not dagger_3.has_prop("versatile"))
+    assert (dagger_3.get_hit_bonus() == 2)
+    assert (dagger_3.get_damage_bonus() == 1)
+    assert (dagger_3.get_damage_type() == "piercing")
+    assert (id(dagger) != id(dagger_3))
+
     try:
         t0.add_weapon('stuff')
         raise Exception("Add weapon succeeded for non-weapon")
     except ValueError:
         pass
+
     print("Passed!")
 
 def test_attack():
@@ -495,4 +560,4 @@ def test_attack():
 
     print("Passed!")
 
-test_all()
+test_weapon()

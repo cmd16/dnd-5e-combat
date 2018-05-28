@@ -25,6 +25,11 @@ from utility_methods_dnd import ability_to_mod, validate_dice, cr_to_xp
 
 class Combatant:
     def __init__(self, **kwargs):
+        combatant_copy = kwargs.get("copy")
+        if combatant_copy:
+            self.make_me_a_copy(combatant_copy, name=kwargs.get("name"))
+            return
+        combatant_copy = kwargs.get("clean_copy")
         self._ac = kwargs.get('ac')
         if not self._ac or not isinstance(self._ac, int):  # TODO: include threshold
             raise ValueError("Must provide ac as an integer")
@@ -84,6 +89,8 @@ class Combatant:
 
         self._death_saves = kwargs.get('death_saves', [])  # TODO: implement
 
+        self._attacks = []
+
         self._weapons = []
         weapons = kwargs.get('weapons', [])
         if not isinstance(weapons, (list, tuple)):
@@ -92,16 +99,58 @@ class Combatant:
             self.add_weapon(weapon)
 
         self._items = kwargs.get('items', [])  # TODO: implement
-        self._spells = kwargs.get('spells', [])  # TODO: implement
-        self._spell_slots = kwargs.get('spell_slots', [])
-
-        self._attacks = []
-        # for weapon in self._weapons:
-        #     self._attacks.extend(weapon.getAttacks())
 
         self._name = kwargs.get('name')
         if not self._name:
             raise ValueError("Must provide a name")
+
+    def make_me_a_copy(self, other, name=""):
+        """
+        Sets instance variables from another Combatant. Warning: this overrides any existing values in self.
+        :param other: another Combatant
+        :return:
+        """
+        if other == self:  # don't bother copying yourself
+            return
+        self._ac = other.get_ac()
+        self._max_hp = other.get_max_hp()
+        self._temp_hp = other.get_temp_hp()
+
+        self._conditions = other.get_conditions()  # set this first in case current hp makes character unconscious
+
+        self._current_hp = other.get_current_hp()
+        if self._current_hp <= 0:
+            warnings.warn("Combatant created with 0 or less hp. Going unconscious (and setting hp to 0).")
+            self.become_unconscious()
+
+        self._hit_dice = other.get_hit_dice()
+        self._speed = other.get_speed()
+        self._vision = other.get_vision()
+
+        self._strength = other.get_strength()
+        self._dexterity = other.get_dexterity()
+        self._constitution = other.get_constitution()
+        self._intelligence = other.get_intelligence()
+        self._wisdom = other.get_wisdom()
+        self._charisma = other.get_charisma()
+
+        self._proficiencies = other.get_proficiencies()
+        self._features = other.get_features()
+
+        self._death_saves = other.get_death_saves()
+
+        self._attacks = []
+
+        self._weapons = []
+        for weapon in other.get_weapons():
+            self.add_weapon(weapons.Weapon(copy=weapon))
+
+        self._items = other.get_items()
+
+        if not name:
+            self._name = other.get_name()
+        else:
+            self._name = name
 
     def get_ac(self):
         return self._ac
@@ -178,12 +227,6 @@ class Combatant:
     def get_items(self):
         return self._items
 
-    def get_spells(self):
-        return self._spells
-
-    def get_spell_slots(self):
-        return self._spell_slots
-
     def get_attacks(self):
         return self._attacks
 
@@ -218,6 +261,11 @@ class Combatant:
     def add_weapon(self, weapon):
         if not isinstance(weapon, weapons.Weapon):
             raise ValueError("%s tried to add a non-weapon as a weapon" % self._name)
+        if weapon in self._weapons:
+            warnings.warn("You (%s) already owns weapon %s" %(self._name, weapon.get_name()))
+        owner = weapon.get_owner()
+        if owner:
+            raise ValueError("Weapon %s is owned by %s. Remove it from them first." % (weapon.get_name(), owner.get_name()))
         self._weapons.append(weapon)
         weapon.set_owner(self)
         self.add_weapon_attacks(weapon)
