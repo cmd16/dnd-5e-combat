@@ -1,4 +1,5 @@
 from utility_methods_dnd import validate_dice
+import warnings
 
 class Weapon:
     def __init__(self, **kwargs):
@@ -103,7 +104,13 @@ class Weapon:
         return self._owner
 
     def set_name(self, name):
+        if name == self._name:
+            return
+        if self._owner:
+            self._owner.remove_weapon_attacks(self)  # clear the attacks to avoid a name conflict
         self._name = name
+        if self._owner:
+            self._owner.add_weapon_attacks(self)
 
     def set_owner(self, owner):
         self._owner = owner

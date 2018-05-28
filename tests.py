@@ -266,7 +266,7 @@ def test_character():
     c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
                             level=5)
-    assert c0.get_level() == 5
+    assert(c0.get_level() == 5)
 
     try:
         c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
@@ -417,16 +417,9 @@ def test_attack():
                              name='t0')
 
     t0.add_weapon(dagger)
-    assert (t0.get_weapons() == [dagger])
-    assert (dagger.get_owner() == t0)
+    assert(dagger in t0.get_weapons())
+    assert(dagger.get_owner() == t0)
 
-    try:
-        t0.add_weapon('stuff')
-        raise Exception("Add weapon succeeded for non-weapon")
-    except ValueError:
-        pass
-
-    t0.add_weapon_attacks(dagger)
     assert(len(t0.get_attacks()) == 3)  # melee and two ranged
 
     dagger_attacks = t0.get_attacks()
@@ -434,7 +427,7 @@ def test_attack():
     dagger_attack = dagger_attacks[0]
     assert(dagger_attack.get_name() == "dagger_range")
     assert(dagger_attack.get_damage_dice() == (1, 4))
-    assert (dagger_attack.get_damage_type() == "piercing")
+    assert(dagger_attack.get_damage_type() == "piercing")
     assert(dagger_attack.get_attack_mod() == 5)  # 3 + 2
     assert(dagger_attack.get_damage_mod() == 4)  # 3 + 1
     assert(dagger_attack.get_range() == 20)
@@ -442,24 +435,38 @@ def test_attack():
     assert(dagger_attack.get_adv() == 0)
 
     dagger_attack = dagger_attacks[1]
-    assert (dagger_attack.get_name() == "dagger_range_disadvantage")
-    assert (dagger_attack.get_damage_dice() == (1, 4))
-    assert (dagger_attack.get_damage_type() == "piercing")
-    assert (dagger_attack.get_attack_mod() == 5)
-    assert (dagger_attack.get_damage_mod() == 4)
-    assert (dagger_attack.get_range() == 60)
-    assert (dagger_attack.get_melee_range() == 0)
-    assert (dagger_attack.get_adv() == -1)
+    assert(dagger_attack.get_name() == "dagger_range_disadvantage")
+    assert(dagger_attack.get_damage_dice() == (1, 4))
+    assert(dagger_attack.get_damage_type() == "piercing")
+    assert(dagger_attack.get_attack_mod() == 5)
+    assert(dagger_attack.get_damage_mod() == 4)
+    assert(dagger_attack.get_range() == 60)
+    assert(dagger_attack.get_melee_range() == 0)
+    assert(dagger_attack.get_adv() == -1)
 
     dagger_attack = dagger_attacks[2]
-    assert (dagger_attack.get_name() == "dagger_melee")
-    assert (dagger_attack.get_damage_dice() == (1, 4))
-    assert (dagger_attack.get_damage_type() == "piercing")
-    assert (dagger_attack.get_attack_mod() == 5)
-    assert (dagger_attack.get_damage_mod() == 4)
-    assert (dagger_attack.get_range() == 0)
-    assert (dagger_attack.get_melee_range() == 5)
-    assert (dagger_attack.get_adv() == 0)
+    assert(dagger_attack.get_name() == "dagger_melee")
+    assert(dagger_attack.get_damage_dice() == (1, 4))
+    assert(dagger_attack.get_damage_type() == "piercing")
+    assert(dagger_attack.get_attack_mod() == 5)
+    assert(dagger_attack.get_damage_mod() == 4)
+    assert(dagger_attack.get_range() == 0)
+    assert(dagger_attack.get_melee_range() == 5)
+    assert(dagger_attack.get_adv() == 0)
+
+    t0.remove_weapon_attacks(dagger)
+    assert(len(t0.get_attacks()) == 0)
+    
+    t0.add_weapon_attacks(dagger)
+    dagger.set_name("stabby")
+    dagger_attacks = t0.get_attacks()
+    assert(dagger_attacks[0].get_name() == "stabby_range")
+    assert(dagger_attacks[1].get_name() == "stabby_range_disadvantage")
+    assert(dagger_attacks[2].get_name() == "stabby_melee")
+
+    t0.remove_weapon(dagger)
+    assert(len(t0.get_weapons()) == 0)
+    assert(len(t0.get_attacks()) == 0)
 
     print("Passed!")
 
