@@ -15,7 +15,7 @@ charisma
 death_saves
 conditions
 skill_proficiencies (add later)
-spells (add later)
+spells (subclass)
 features (add later)
 """
 import warnings
