@@ -84,8 +84,6 @@ def test_combatant():
     assert(not t0.get_conditions())
     assert(not t0.get_weapons())
     assert(not t0.get_items())
-    assert(not t0.get_spells())
-    assert(not t0.get_spell_slots())
 
     try:
         t1 = combatant.Combatant(name="bob")
@@ -497,4 +495,4 @@ def test_attack():
 
     print("Passed!")
 
-test_attack()
+test_all()

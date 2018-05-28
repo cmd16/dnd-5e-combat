@@ -9,7 +9,7 @@ def ability_to_mod(score):
     return (score -10) // 2
 
 def validate_dice(dice):
-    if isinstance(dice, (tuple, list)):
+    if isinstance(dice, tuple):  # lists are mutable and that could be a problem
         if len(dice) != 2:
             raise ValueError("Must provide exactly two values: number of dice and type of dice (1, 6)")
         if not isinstance(dice[0], int) or not isinstance(dice[1], int):
@@ -18,11 +18,11 @@ def validate_dice(dice):
         try:
             dice = tuple(int(x) for x in dice.split("d"))
         except ValueError:
-            raise ValueError("Must provide damage dice in tuple or list of two ints (1, 6) or string format 1d6")
+            raise ValueError("Must provide damage dice in tuple of two ints (1, 6) or string format 1d6")
         if len(dice) != 2:
-            raise ValueError("Must provide damage dice in tuple or list of two ints (1, 6) or string format 1d6")
+            raise ValueError("Must provide damage dice in tuple of two ints (1, 6) or string format 1d6")
     else:
-        raise ValueError("Must provide damage dice in tuple or list of two ints (1, 6) or string format 1d6")
+        raise ValueError("Must provide damage dice in tuple of two ints (1, 6) or string format 1d6")
     return dice
 
 def roll_dice(dice_type, num=1, modifier=0, adv=0, critable=0):  # -1 for disadvantage, 0 for normal, 1 for advantage
