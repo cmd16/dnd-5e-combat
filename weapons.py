@@ -74,6 +74,8 @@ class Weapon:
         """
         if other == self:  # don't bother copying yourself
             return
+        if not isinstance(other, Weapon):
+            raise ValueError("Cannot make self a copy of something that is not a Weapon")
         self._range = other.get_range()
         self._melee_range = other.get_melee_range()
         self._props = other.get_properties()

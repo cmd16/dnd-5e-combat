@@ -264,6 +264,23 @@ def test_creature():
     assert(c0.get_cr() == 1/4)
     assert(c0.get_xp() == 50)
 
+    c1 = combatant.Creature(copy=c0, name="c1")
+    assert(c1.get_name() == "c1")
+    assert(c1.get_max_hp() == 70)  # just check a stat lol
+    assert(c1.get_cr() == 1/4)
+    assert(c1.get_xp() == 50)
+    assert(id(c0) != id(c1))
+
+    t2 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='normal',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name="t2")
+    c2 = combatant.Creature(copy=t2, name="c2", cr=1, xp=200)
+    assert(c2.get_name() == "c2")
+    assert(c2.get_ac() == 18)
+    assert(c2.get_cr() == 1)
+    assert(c2.get_xp() == 200)
+    assert(id(c2) != id(c0))
+
     try:
         c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
@@ -288,6 +305,22 @@ def test_character():
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name="c0",
                             level=5)
     assert(c0.get_level() == 5)
+
+    c1 = combatant.Character(copy=c0, name="c1")
+    assert(c1.get_name() == "c1")
+    assert(c1.get_temp_hp() == 2)
+    assert(c1.get_level() == 5)
+    assert(id(c1) != id(c0))
+
+    t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name='t0')
+
+    c2 = combatant.Character(copy=t0, level=2, name="c2")
+    assert(c2.get_name() == "c2")
+    assert(c2.get_vision() == "darkvision")
+    assert(c2.get_level() == 2)
+    assert(id(c2) != id(t0))
 
     try:
         c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
@@ -560,4 +593,4 @@ def test_attack():
 
     print("Passed!")
 
-test_weapon()
+test_character()

@@ -112,6 +112,8 @@ class Combatant:
         """
         if other == self:  # don't bother copying yourself
             return
+        if not isinstance(other, Combatant):
+            raise ValueError("Cannot make self a copy of something that is not a Combatant")
         self._ac = other.get_ac()
         self._max_hp = other.get_max_hp()
         self._temp_hp = other.get_temp_hp()
@@ -343,11 +345,32 @@ class Combatant:
 
 class Creature(Combatant):
     def __init__(self, **kwargs):
+        # do this before super so that there aren't multiple calls to make_me_a_copy
+        copy_creature = kwargs.get("copy")
+        if copy_creature:
+            self.make_me_a_copy(copy_creature, name=kwargs.get("name"), cr=kwargs.get("cr"), xp=kwargs.get("xp"))
+            return
         super().__init__(**kwargs)
         self._cr = kwargs.get("cr", 0)
         if not isinstance(self._cr, (int, float)) or self._cr <= 0:
             raise ValueError("Challenge rating must be a non-negative number")
         self._xp = kwargs.get("xp", cr_to_xp(self._cr))
+
+    def make_me_a_copy(self, other, name="", cr=0, xp=0):
+        super().make_me_a_copy(other, name)
+        if isinstance(other, Creature):
+            self._cr = other.get_cr()
+            self._xp = other.get_xp()
+        else:
+            if not isinstance(cr, (int, float)) or cr < 0:
+                raise ValueError("Challenge rating must be a non-negative number")
+            self._cr = cr
+            if xp:
+                if not isinstance(xp, int) or xp < 0:
+                    raise ValueError("XP must be a non-negative integer")
+                self._xp = xp
+            else:
+                self._xp = cr_to_xp(self._cr)
 
     def get_cr(self):
         return self._cr
@@ -357,12 +380,27 @@ class Creature(Combatant):
 
 class Character(Combatant):
     def __init__(self, **kwargs):
+        copy_character = kwargs.get("copy")
+        if copy_character:
+            self.make_me_a_copy(copy_character, name=kwargs.get("name"), level=kwargs.get("level"))
+            return
         super().__init__(**kwargs)
         self._level = kwargs.get("level")
         if not self._level:
             raise ValueError("No level provided or level is 0")
         if not isinstance(self._level, int) or self._level < 1 or self._level > 20:
             raise ValueError("Level must be an integer between 1 and 20")
+
+    def make_me_a_copy(self, other, name="", level=0):
+        super().make_me_a_copy(other, name)
+        self._level = level
+        if isinstance(other, Character):
+            self._level = other.get_level()
+        else:
+            if not self._level:
+                raise ValueError("No level provided or level is 0")
+            if not isinstance(self._level, int) or self._level < 1 or self._level > 20:
+                raise ValueError("Level must be an integer between 1 and 20")
 
     def get_level(self):
         return self._level
