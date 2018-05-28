@@ -20,8 +20,8 @@ class Weapon:
                 raise ValueError("Must provide range in tuple or list of two ints (20, 60) or string format 20/60")
             if len(self._range) != 2:
                 raise ValueError("Must provide range in tuple or list of two ints (20, 60) or string format 20/60")
-        else:
-            raise ValueError("Must provide damage dice in tuple or list of two ints (1, 6) or string format 1d6")
+        elif self._range != 0:
+            raise ValueError("Must provide range in tuple or list of two ints (1, 6) or string format 1d6")
         self._melee_range = kwargs.get('melee_range', 0)
         if not self._range and not self._melee_range:  # assume this is a melee weapon if not otherwise specified
             self._melee_range = 5

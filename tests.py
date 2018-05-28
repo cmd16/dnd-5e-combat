@@ -468,6 +468,33 @@ def test_attack():
     assert(len(t0.get_weapons()) == 0)
     assert(len(t0.get_attacks()) == 0)
 
+    dagger.set_name("dagger")
+
+    mace = weapons.Weapon(name="mace", damage_dice=(1, 6), damage_type="bludgeoning")
+    assert(mace.get_melee_range() == 5)
+
+    t0.add_weapon(dagger)
+    t0.add_weapon(mace)
+
+    assert(len(t0.get_attacks()) == 4)
+    t0.remove_weapon(mace)
+    assert(len(t0.get_attacks()) == 3)
+
+    attack_names = [attack.get_name() for attack in t0.get_attacks()]
+    assert(attack_names[0] == "dagger_range")
+    assert(attack_names[1] == "dagger_range_disadvantage")
+    assert(attack_names[2] == "dagger_melee")
+
+    t0.add_weapon(mace)
+    t0.remove_weapon(dagger)
+    assert(len(t0.get_attacks()) == 1)
+    assert(t0.get_attacks()[0].get_name() == "mace_melee")
+    t0.add_weapon(dagger)
+
+    t0.remove_all_weapons()
+    assert(len(t0.get_weapons()) == 0)
+    assert(len(t0.get_attacks()) == 0)
+
     print("Passed!")
 
 test_attack()

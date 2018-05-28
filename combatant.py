@@ -229,6 +229,12 @@ class Combatant:
         weapon.set_owner(None)  # Dobby is a free weapon!
         self.remove_weapon_attacks(weapon)
 
+    def remove_all_weapons(self):
+        to_remove = self._weapons[:]  # make a copy so I can iterate through the list
+        for weapon in to_remove:
+            self.remove_weapon(weapon)
+
+
     def add_weapon_attacks(self, weapon):
         # Warning: if a Combatant has multiple weapons with the exact same name,
             # problems will arise because weapon attack names will not be unique
@@ -251,10 +257,6 @@ class Combatant:
                                      name="%s_melee" % weapon.get_name(), damage_type=weapon.get_damage_type(),
                                     melee_range=weapon.get_melee_range()))
 
-    def add_all_weapon_attacks(self):
-        for weapon in self._weapons:
-            self.add_weapon_attacks(weapon)
-
     def remove_weapon_attacks(self, weapon):
         weapon_name = weapon.get_name()
         names_to_remove = []
@@ -264,17 +266,6 @@ class Combatant:
         if weapon.get_melee_range():
             names_to_remove.append("%s_melee" % weapon_name)
         # modify attack list in place
-        self._attacks[:] = [attack for attack in self._attacks if attack.get_name() not in names_to_remove]
-
-    def remove_all_weapon_attacks(self):
-        names_to_remove = []
-        for weapon in self._weapons:
-            weapon_name = weapon.get_name()
-            if weapon.get_range():
-                names_to_remove.append("%s_range" % weapon_name)
-                names_to_remove.append("%s_range_disadvantage" % weapon_name)
-            if weapon.get_melee_range():
-                names_to_remove.append("%s_melee" % weapon_name)
         self._attacks[:] = [attack for attack in self._attacks if attack.get_name() not in names_to_remove]
 
     def add_condition(self, condition):
