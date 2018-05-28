@@ -311,14 +311,14 @@ def test_weapon():
     except ValueError:
         pass
 
-    dagger = weapons.Weapon(finesse=1, light=1, range="20/60", melee_range=5, name="dagger", damage_dice=(1, 4),
-                            hit_bonus=2, damage_bonus=1, damage_type="slashing")
+    dagger = weapons.Weapon(finesse=1, light=1, range=(20, 60), melee_range=5, name="dagger", damage_dice=(1, 4),
+                            hit_bonus=2, damage_bonus=1, damage_type="piercing")
     assert(dagger.get_name() == "dagger")
     props = dagger.get_properties()
     assert("finesse" in props)
     assert("light" in props)
     assert("range" in props)
-    assert(dagger.get_range() == "20/60")
+    assert(dagger.get_range() == (20, 60))
     assert("melee" in props)
     assert(dagger.get_melee_range() == 5)
     assert(dagger.get_damage_dice() == (1, 4))
@@ -330,7 +330,7 @@ def test_weapon():
     assert(dagger.has_prop("finesse"))
     assert(dagger.get_hit_bonus() == 2)
     assert(dagger.get_damage_bonus() == 1)
-    assert(dagger.get_damage_type() == "slashing")
+    assert(dagger.get_damage_type() == "piercing")
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -408,7 +408,59 @@ def test_attack():
     # for key in sorted(damage_roll_freqdist.keys()):
     #     print("%d: %d" % (key, damage_roll_freqdist[key]), end=", ")
     # print()
+
+    dagger = weapons.Weapon(finesse=1, light=1, range=(20, 60), melee_range=5, name="dagger", damage_dice=(1, 4),
+                            hit_bonus=2, damage_bonus=1, damage_type="piercing")  # cool damage thing
+
+    t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name='t0')
+
+    t0.add_weapon(dagger)
+    assert (t0.get_weapons() == [dagger])
+    assert (dagger.get_owner() == t0)
+
+    try:
+        t0.add_weapon('stuff')
+        raise Exception("Add weapon succeeded for non-weapon")
+    except ValueError:
+        pass
+
+    t0.add_weapon_attacks(dagger)
+    assert(len(t0.get_attacks()) == 3)  # melee and two ranged
+
+    dagger_attacks = t0.get_attacks()
+
+    dagger_attack = dagger_attacks[0]
+    assert(dagger_attack.get_name() == "dagger_range")
+    assert(dagger_attack.get_damage_dice() == (1, 4))
+    assert (dagger_attack.get_damage_type() == "piercing")
+    assert(dagger_attack.get_attack_mod() == 5)  # 3 + 2
+    assert(dagger_attack.get_damage_mod() == 4)  # 3 + 1
+    assert(dagger_attack.get_range() == 20)
+    assert(dagger_attack.get_melee_range() == 0)
+    assert(dagger_attack.get_adv() == 0)
+
+    dagger_attack = dagger_attacks[1]
+    assert (dagger_attack.get_name() == "dagger_range_disadvantage")
+    assert (dagger_attack.get_damage_dice() == (1, 4))
+    assert (dagger_attack.get_damage_type() == "piercing")
+    assert (dagger_attack.get_attack_mod() == 5)
+    assert (dagger_attack.get_damage_mod() == 4)
+    assert (dagger_attack.get_range() == 60)
+    assert (dagger_attack.get_melee_range() == 0)
+    assert (dagger_attack.get_adv() == -1)
+
+    dagger_attack = dagger_attacks[2]
+    assert (dagger_attack.get_name() == "dagger_melee")
+    assert (dagger_attack.get_damage_dice() == (1, 4))
+    assert (dagger_attack.get_damage_type() == "piercing")
+    assert (dagger_attack.get_attack_mod() == 5)
+    assert (dagger_attack.get_damage_mod() == 4)
+    assert (dagger_attack.get_range() == 0)
+    assert (dagger_attack.get_melee_range() == 5)
+    assert (dagger_attack.get_adv() == 0)
+
     print("Passed!")
 
-test_weapon()
-# test_attack()
+test_attack()

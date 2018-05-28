@@ -7,6 +7,20 @@ class Weapon:
         self._heavy = kwargs.get('heavy', 0)
         self._load = kwargs.get('load', 0)
         self._range = kwargs.get('range', 0)  # range is 0 or a tuple. For our purposes it's the same property as thrown
+        if isinstance(self._range, (tuple, list)):
+            if len(self._range) != 2:
+                raise ValueError("Must provide exactly two values: normal range and disadvantage range")
+            if not isinstance(self._range[0], int) or not isinstance(self._range[1], int):
+                raise ValueError("Must provide exactly two integer values: normal range and disadvantage range")
+        elif isinstance(self._range, str):
+            try:
+                self._range = tuple(int(x) for x in self._range.split("/"))
+            except ValueError:
+                raise ValueError("Must provide range in tuple or list of two ints (20, 60) or string format 20/60")
+            if len(self._range) != 2:
+                raise ValueError("Must provide range in tuple or list of two ints (20, 60) or string format 20/60")
+        else:
+            raise ValueError("Must provide damage dice in tuple or list of two ints (1, 6) or string format 1d6")
         self._melee_range = kwargs.get('melee_range', 0)
         if not self._range and not self._melee_range:  # assume this is a melee weapon if not otherwise specified
             self._melee_range = 5
