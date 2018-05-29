@@ -1,7 +1,9 @@
 from utility_methods_dnd import roll_dice, validate_dice, calc_advantage
+import weapons
 
 class Attack:
-    def __init__(self, damage_dice, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name=""):
+    def __init__(self, damage_dice, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
+                 weapon=None):
         self._damage_dice = validate_dice(damage_dice)
         if not isinstance(attack_mod, int):
             raise ValueError("Attack mod should be an integer")
@@ -31,6 +33,12 @@ class Attack:
         self._name = name
         if not isinstance(name, str):
             raise ValueError("Name should be a string")
+        if isinstance(weapon, weapons.Weapon):
+            self._weapon = weapon
+        elif weapon:
+            raise ValueError("Weapon should be a Weapon object")
+        else:
+            self._weapon = None
 
     def get_damage_dice(self):
         return self._damage_dice
@@ -55,6 +63,9 @@ class Attack:
 
     def get_name(self):
         return self._name
+
+    def get_weapon(self):
+        return self._weapon
 
     def roll_attack(self, adv=0):  # adv is the additional advantage afforded by circumstance
         return roll_dice(20, adv=calc_advantage([self._adv, adv]), modifier=self._attack_mod, critable=True)

@@ -248,7 +248,6 @@ class Combatant:
                 return damage
             damage -= self._temp_hp  # empty out temp hp
             self._temp_hp = 0
-        current_hp = self._current_hp
         self._current_hp -= damage
         if self._current_hp <= self._max_hp * -1:  # if remaining damage meets or exceeds your max hp
             self.die()
@@ -298,25 +297,17 @@ class Combatant:
         if weapon.get_range():
             self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_range" % weapon.get_name(), damage_type=weapon.get_damage_type(),
-                                                range=weapon.get_range()[0]))
+                                                range=weapon.get_range()[0], weapon=weapon))
             self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_range_disadvantage" % weapon.get_name(), damage_type=weapon.get_damage_type(),
-                                                range=weapon.get_range()[1], adv=-1))
+                                                range=weapon.get_range()[1], adv=-1, weapon=weapon))
         if weapon.get_melee_range():
             self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_melee" % weapon.get_name(), damage_type=weapon.get_damage_type(),
-                                    melee_range=weapon.get_melee_range()))
+                                    melee_range=weapon.get_melee_range(), weapon=weapon))
 
     def remove_weapon_attacks(self, weapon):
-        weapon_name = weapon.get_name()
-        names_to_remove = []
-        if weapon.get_range():
-            names_to_remove.append("%s_range" % weapon_name)
-            names_to_remove.append("%s_range_disadvantage" % weapon_name)
-        if weapon.get_melee_range():
-            names_to_remove.append("%s_melee" % weapon_name)
-        # modify attack list in place
-        self._attacks[:] = [attack for attack in self._attacks if attack.get_name() not in names_to_remove]
+        self._attacks[:] = [attack for attack in self._attacks if attack.get_weapon() is not weapon]
 
     def add_condition(self, condition):
         # TODO: validate condition

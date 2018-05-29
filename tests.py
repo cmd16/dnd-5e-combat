@@ -106,7 +106,7 @@ def test_combatant():
     assert(not t10.get_conditions())
     assert(not t10.get_weapons())
     assert(not t10.get_items())
-    assert(id(t10) != id(t0))
+    assert(t10 is not t0)
 
     try:
         t1 = combatant.Combatant(name="bob")
@@ -269,7 +269,7 @@ def test_creature():
     assert(c1.get_max_hp() == 70)  # just check a stat lol
     assert(c1.get_cr() == 1/4)
     assert(c1.get_xp() == 50)
-    assert(id(c0) != id(c1))
+    assert(c0 is not c1)
 
     t2 = combatant.Combatant(ac=18, max_hp=30, current_hp=5, temp_hp=2, hit_dice='1d4', speed=20, vision='normal',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -279,7 +279,7 @@ def test_creature():
     assert(c2.get_ac() == 18)
     assert(c2.get_cr() == 1)
     assert(c2.get_xp() == 200)
-    assert(id(c2) != id(c0))
+    assert(c2 is not c0)
 
     try:
         c0 = combatant.Creature(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
@@ -310,7 +310,7 @@ def test_character():
     assert(c1.get_name() == "c1")
     assert(c1.get_temp_hp() == 2)
     assert(c1.get_level() == 5)
-    assert(id(c1) != id(c0))
+    assert(c1 is not c0)
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -320,7 +320,7 @@ def test_character():
     assert(c2.get_name() == "c2")
     assert(c2.get_vision() == "darkvision")
     assert(c2.get_level() == 2)
-    assert(id(c2) != id(t0))
+    assert(c2 is not t0)
 
     try:
         c0 = combatant.Character(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='normal',
@@ -403,7 +403,7 @@ def test_weapon():
     assert(dagger_2.get_hit_bonus() == 2)
     assert(dagger_2.get_damage_bonus() == 1)
     assert(dagger_2.get_damage_type() == "piercing")
-    assert(id(dagger) != id(dagger_2))  # make sure they aren't the same object
+    assert(dagger is not dagger_2)  # make sure they aren't the same object
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
@@ -411,7 +411,7 @@ def test_weapon():
 
     t0.add_weapon(dagger)
     assert(t0.get_weapons() == [dagger])
-    assert(dagger.get_owner() == t0)
+    assert(dagger.get_owner() is t0)
 
     t1 = combatant.Combatant(copy=t0, name="t1")
     assert(len(t1.get_weapons()) == 1)
@@ -433,7 +433,7 @@ def test_weapon():
     assert (dagger_3.get_hit_bonus() == 2)
     assert (dagger_3.get_damage_bonus() == 1)
     assert (dagger_3.get_damage_type() == "piercing")
-    assert (id(dagger) != id(dagger_3))
+    assert (dagger is not dagger_3)
 
     try:
         t0.add_weapon('stuff')
@@ -514,7 +514,7 @@ def test_attack():
 
     t0.add_weapon(dagger)
     assert(dagger in t0.get_weapons())
-    assert(dagger.get_owner() == t0)
+    assert(dagger.get_owner() is t0)
 
     assert(len(t0.get_attacks()) == 3)  # melee and two ranged
 
@@ -522,6 +522,7 @@ def test_attack():
 
     dagger_attack = dagger_attacks[0]
     assert(dagger_attack.get_name() == "dagger_range")
+    assert(dagger_attack.get_weapon() is dagger)
     assert(dagger_attack.get_damage_dice() == (1, 4))
     assert(dagger_attack.get_damage_type() == "piercing")
     assert(dagger_attack.get_attack_mod() == 5)  # 3 + 2
@@ -593,4 +594,4 @@ def test_attack():
 
     print("Passed!")
 
-test_character()
+test_all()
