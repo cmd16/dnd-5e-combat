@@ -604,15 +604,19 @@ def test_attack():
     dagger_melee = t0.get_attacks()[2]
     mace_melee = t1.get_attacks()[0]
 
-    # t0.set_verbose(True)
-    # t1.set_verbose(True)
-    #
-    # for i in range(1000):
-    #     t0.send_attack(t1, dagger_melee)
-    #     t1.send_attack(t0, mace_melee)
-    #
-    # t0.set_verbose(False)
-    # t1.set_verbose(False)
+    t0.set_verbose(True)
+    t1.set_verbose(True)
+
+    for i in range(15):
+        t0.send_attack(t1, dagger_melee)
+        if t1.has_condition("unconscious") or t1.has_condition("dead"):
+            break
+        t1.send_attack(t0, mace_melee)
+        if t0.has_condition("unconscious") or t0.has_condition("dead"):
+            break
+
+    t0.set_verbose(False)
+    t1.set_verbose(False)
 
     print("Passed!")
 

@@ -70,5 +70,8 @@ class Attack:
     def roll_attack(self, adv=0):  # adv is the additional advantage afforded by circumstance
         return roll_dice(20, adv=calc_advantage([self._adv, adv]), modifier=self._attack_mod, critable=True)
 
-    def roll_damage(self):
-        return roll_dice(self._damage_dice[1], num=self._damage_dice[0], modifier=self._damage_mod, critable=False)
+    def roll_damage(self, crit=0):
+        num = self._damage_dice[0]
+        if crit:
+            num *= 2
+        return roll_dice(dice_type=self._damage_dice[1], num=num, modifier=self._damage_mod, critable=False)[0]  # don't need crit info

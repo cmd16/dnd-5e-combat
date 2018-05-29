@@ -334,12 +334,12 @@ class Combatant:
                 print("%s attacks %s with %s, rolls a %d, and" % (self._name, target.get_name(), attack.get_name(),
                                                              result[0]), end=" ")
             if target.take_attack(result):  # take_attack returns True if attack hits
-                self.send_damage(attack, target, crit=result[1])
                 if self._verbose:
                     if result[1] == 1:
-                        print("critical hit")
+                        print("critical hit!", end=" ")  # leave room for damage info
                     else:
-                        print("hits")
+                        print("hits!", end=" ")
+                self.send_damage(target, attack, crit=result[1])
             else:
                 if self._verbose:
                     if result[1] == -1:
@@ -356,10 +356,10 @@ class Combatant:
         return hit_val >= self._ac
 
     def send_damage(self, target, attack, crit=0):
-        pass
+        damage = attack.roll_damage(crit=crit)
+        target.take_damage(damage)
 
-    def take_damage(self,
-                    damage):  # assumes all pre-processing has been done (e.g., damage halved for successful saves)
+    def take_damage(self, damage):
         if self._verbose:
             print("%s takes %d damage" % (self._name, damage))
         if self._temp_hp:
