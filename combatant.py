@@ -104,6 +104,8 @@ class Combatant:
         if not self._name:
             raise ValueError("Must provide a name")
 
+        self._verbose = kwargs.get("verbose", False)
+
     def make_me_a_copy(self, other, name=""):
         """
         Sets instance variables from another Combatant. Warning: this overrides any existing values in self.
@@ -235,29 +237,17 @@ class Combatant:
     def get_name(self):
         return self._name
 
+    def get_verbose(self):
+        return self._verbose
+
     def set_ac(self, ac):
         self._ac = ac
 
     def set_temp_hp(self, hp):
         self._temp_hp = hp
 
-    def take_damage(self, damage):   # assumes all pre-processing has been done (e.g., damage halved for successful saves)
-        if self._temp_hp:
-            if damage <= self._temp_hp:
-                self._temp_hp -= damage
-                return damage
-            damage -= self._temp_hp  # empty out temp hp
-            self._temp_hp = 0
-        self._current_hp -= damage
-        if self._current_hp <= self._max_hp * -1:  # if remaining damage meets or exceeds your max hp
-            self.die()
-        elif self._current_hp <= 0:
-            self.become_unconscious()
-
-    def take_healing(self, healing):
-        self._current_hp = min(self._current_hp + healing, self._max_hp)
-        if self.has_condition("unconscious"):
-            self.remove_condition("unconscious")
+    def set_verbose(self, val):
+        self._verbose = bool(val)
 
     def add_weapon(self, weapon):
         if not isinstance(weapon, weapons.Weapon):
@@ -270,6 +260,8 @@ class Combatant:
         self._weapons.append(weapon)
         weapon.set_owner(self)
         self.add_weapon_attacks(weapon)
+        if self._verbose:
+            print("%s adds %s weapon" % (self._name, weapon.get_name()))
 
     def remove_weapon(self, weapon):
         if weapon not in self._weapons:
@@ -277,12 +269,13 @@ class Combatant:
         self._weapons.remove(weapon)
         weapon.set_owner(None)  # Dobby is a free weapon!
         self.remove_weapon_attacks(weapon)
+        if self._verbose:
+            print("%s removes %s weapon" % (self._name, weapon.get_name()))
 
     def remove_all_weapons(self):
         to_remove = self._weapons[:]  # make a copy so I can iterate through the list
         for weapon in to_remove:
             self.remove_weapon(weapon)
-
 
     def add_weapon_attacks(self, weapon):
         # Warning: if a Combatant has multiple weapons with the exact same name,
@@ -310,18 +303,83 @@ class Combatant:
         self._attacks[:] = [attack for attack in self._attacks if attack.get_weapon() is not weapon]
 
     def add_condition(self, condition):
-        # TODO: validate condition
+        # TODO: validate condition?
         if condition not in self._conditions:
             self._conditions.append(condition)
+            if self._verbose:
+                print("%s is now %s" % (self._name, condition))
 
     def remove_condition(self, condition):
         try:
             self._conditions.remove(condition)
+            if self._verbose:
+                print("%s is no longer %s" % (self._name, condition))
         except ValueError:
             pass  # TODO: change later?
 
     def change_vision(self, vision):  # in case of special vision changing magic? also useful for testing
-        self._vision = vision
+        if vision in ["normal", "darkvision", "blindsight", "truesight"]:
+            self._vision = vision
+            if self._verbose:
+                print("%s changes vision to %s" % (self._name, vision))
+        else:
+            raise ValueError("Vision type not recognized")
+
+    def send_attack(self, target, attack, adv=0):
+        if not isinstance(attack, attack_class.Attack):
+            raise ValueError("%s tried to make an attack with something that is not an Attack" % self._name)
+        result = attack.roll_attack(adv=adv)
+        try:
+            if self._verbose:
+                print("%s attacks %s with %s, rolls a %d, and" % (self._name, target.get_name(), attack.get_name(),
+                                                             result[0]), end=" ")
+            if target.take_attack(result):  # take_attack returns True if attack hits
+                self.send_damage(attack, target, crit=result[1])
+                if self._verbose:
+                    if result[1] == 1:
+                        print("critical hit")
+                    else:
+                        print("hits")
+            else:
+                if self._verbose:
+                    if result[1] == -1:
+                        print("critical miss")
+                    else:
+                        print("misses")
+        except NameError:
+            raise ValueError("%s tried to attack something that can't take attacks" % self._name)
+
+    def take_attack(self, attack_result):
+        hit_val, crit_val = attack_result
+        if crit_val == -1:  # critical fails auto-miss
+            return False
+        return hit_val >= self._ac
+
+    def send_damage(self, target, attack, crit=0):
+        pass
+
+    def take_damage(self,
+                    damage):  # assumes all pre-processing has been done (e.g., damage halved for successful saves)
+        if self._verbose:
+            print("%s takes %d damage" % (self._name, damage))
+        if self._temp_hp:
+            if damage <= self._temp_hp:
+                self._temp_hp -= damage
+                return damage
+            damage -= self._temp_hp  # empty out temp hp
+            self._temp_hp = 0
+        self._current_hp -= damage
+        if self._current_hp <= self._max_hp * -1:  # if remaining damage meets or exceeds your max hp
+            self.die()
+        elif self._current_hp <= 0:
+            self.become_unconscious()
+
+    def take_healing(self, healing):
+        self._current_hp = min(self._current_hp + healing, self._max_hp)
+        if self._verbose:
+            print("%s is healed for %d" % (self._name, healing), end=" ")
+        if self.has_condition("unconscious"):
+            self.remove_condition("unconscious")
 
     def become_unconscious(self):
         warnings.warn("Becoming unconscious not fully implemented yet")  # TODO: become unconscious
@@ -330,7 +388,8 @@ class Combatant:
 
     def die(self):
         warnings.warn("Dying not fully implemented yet")  # TODO: die
-        self._conditions = ["dead"]  # TODO: change death later?
+        self._conditions = []
+        self.add_condition("dead")  # TODO: change death later?
         self._current_hp = 0
         self._temp_hp = 0
 

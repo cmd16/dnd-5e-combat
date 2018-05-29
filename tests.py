@@ -592,6 +592,28 @@ def test_attack():
     assert(len(t0.get_weapons()) == 0)
     assert(len(t0.get_attacks()) == 0)
 
+    dagger.set_hit_bonus(0)
+    dagger.set_damage_bonus(0)
+
+    t0.add_weapon(dagger)
+    t1 = combatant.Combatant(ac=18, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name='t1')  # almost identical to t0, but harder to hit
+    t1.add_weapon(mace)
+
+    dagger_melee = t0.get_attacks()[2]
+    mace_melee = t1.get_attacks()[0]
+
+    # t0.set_verbose(True)
+    # t1.set_verbose(True)
+    #
+    # for i in range(1000):
+    #     t0.send_attack(t1, dagger_melee)
+    #     t1.send_attack(t0, mace_melee)
+    #
+    # t0.set_verbose(False)
+    # t1.set_verbose(False)
+
     print("Passed!")
 
-test_all()
+test_attack()

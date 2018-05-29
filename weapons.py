@@ -139,6 +139,12 @@ class Weapon:
     def get_owner(self):
         return self._owner
 
+    def get_hit_bonus(self):
+        return self._hit_bonus
+
+    def get_damage_bonus(self):
+        return self._damage_bonus
+
     def set_name(self, name):
         if name == self._name:
             return
@@ -151,8 +157,8 @@ class Weapon:
     def set_owner(self, owner):
         self._owner = owner
 
-    def get_hit_bonus(self):
-        return self._hit_bonus
+    def set_hit_bonus(self, hit_bonus):
+        self._hit_bonus = hit_bonus
 
-    def get_damage_bonus(self):
-        return self._damage_bonus
+    def set_damage_bonus(self, damage_bonus):
+        self._damage_bonus = damage_bonus
