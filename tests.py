@@ -596,9 +596,9 @@ def test_attack():
     dagger.set_damage_bonus(0)
 
     t0.add_weapon(dagger)
-    t1 = combatant.Combatant(ac=18, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+    t1 = combatant.Combatant(ac=10, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
-                             name='t1')  # almost identical to t0, but harder to hit
+                             name='t1')  # almost identical to t0, but easier to hit
     t1.add_weapon(mace)
 
     dagger_melee = t0.get_attacks()[2]

@@ -326,38 +326,16 @@ class Combatant:
             raise ValueError("Vision type not recognized")
 
     def send_attack(self, target, attack, adv=0):
-        if not isinstance(attack, attack_class.Attack):
-            raise ValueError("%s tried to make an attack with something that is not an Attack" % self._name)
-        result = attack.roll_attack(adv=adv)
         try:
-            if self._verbose:
-                print("%s attacks %s with %s, rolls a %d, and" % (self._name, target.get_name(), attack.get_name(),
-                                                             result[0]), end=" ")
-            if target.take_attack(result):  # take_attack returns True if attack hits
-                if self._verbose:
-                    if result[1] == 1:
-                        print("critical hit!", end=" ")  # leave room for damage info
-                    else:
-                        print("hits!", end=" ")
-                self.send_damage(target, attack, crit=result[1])
-            else:
-                if self._verbose:
-                    if result[1] == -1:
-                        print("critical miss")
-                    else:
-                        print("misses")
-        except NameError:
-            raise ValueError("%s tried to attack something that can't take attacks" % self._name)
+            attack.make_attack(self, target, adv=adv)
+        except:
+            raise ValueError("%s tried to make an attack with something that can't make attacks" % self._name)
 
     def take_attack(self, attack_result):
         hit_val, crit_val = attack_result
         if crit_val == -1:  # critical fails auto-miss
             return False
         return hit_val >= self._ac
-
-    def send_damage(self, target, attack, crit=0):
-        damage = attack.roll_damage(crit=crit)
-        target.take_damage(damage)
 
     def take_damage(self, damage):
         if self._verbose:
