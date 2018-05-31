@@ -83,7 +83,7 @@ class Attack:
             if verbose:
                 print("%s attacks %s with %s and rolls a %d." % (source.get_name(), target.get_name(), self._name,
                                                                   result[0]), end=" ")
-            if target.take_attack(result):  # take_attack returns True if attack hits
+            if self.does_attack_hit(target, result):  # take_attack returns True if attack hits
                 if verbose:
                     if result[1] == 1:
                         print("Critical hit!", end=" ")  # leave room for damage info
@@ -99,6 +99,47 @@ class Attack:
         except NameError:
             raise ValueError("%s tried to attack something that can't take attacks" % source._name)
 
+    def does_attack_hit(self, target, attack_result):
+        hit_val, crit_val = attack_result
+        if crit_val == -1:  # critical fails auto-miss
+            return False
+        return hit_val >= target.get_ac()
+
     def send_damage(self, target, source=None, crit=0):
         damage = self.roll_damage(crit=crit)
         target.take_damage(damage)
+
+class SavingThrowAttack(Attack):
+    def __init__(self, damage_dice, dc, damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
+                 weapon=None):
+        super().__init__(damage_dice, attack_mod, damage_mod=damage_mod, damage_type=damage_type, range=range,
+                         melee_range=melee_range, adv=adv, name=name, weapon=weapon)
+        self._dc = dc
+        self._damage_on_success = damage_on_success  # half damage on successful save
+
+    def get_dc(self):
+        return self._dc
+
+    def get_damage_on_success(self):
+        return self._damage_on_success
+
+    # def make_attack(self, source, target, adv=0):
+    #     verbose = source.get_verbose()
+    #     try:
+    #         if verbose:
+    #             print("%s attacks %s with %s." % (source.get_name(), target.get_name(), self._name))
+    #         if target.take_attack(result):  # take_attack returns True if attack hits
+    #             if verbose:
+    #                 if result[1] == 1:
+    #                     print("Critical hit!", end=" ")  # leave room for damage info
+    #                 else:
+    #                     print("Hit!", end=" ")
+    #             self.send_damage(target, source=source, crit=result[1])
+    #         else:
+    #             if verbose:
+    #                 if result[1] == -1:
+    #                     print("Critical miss.")
+    #                 else:
+    #                     print("Miss.")
+    #     except NameError:
+    #         raise ValueError("%s tried to attack something that can't take attacks" % source._name)

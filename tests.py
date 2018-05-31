@@ -508,7 +508,7 @@ def test_attack():
     dagger = weapons.Weapon(finesse=1, light=1, range=(20, 60), melee_range=5, name="dagger", damage_dice=(1, 4),
                             hit_bonus=2, damage_bonus=1, damage_type="piercing")  # cool damage thing
 
-    t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+    t0 = combatant.Combatant(ac=12, max_hp=40, current_hp=40, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
                              name='t0')
 
@@ -596,7 +596,7 @@ def test_attack():
     dagger.set_damage_bonus(0)
 
     t0.add_weapon(dagger)
-    t1 = combatant.Combatant(ac=10, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+    t1 = combatant.Combatant(ac=10, max_hp=40, current_hp=40, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
                              strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
                              name='t1')  # almost identical to t0, but easier to hit
     t1.add_weapon(mace)
