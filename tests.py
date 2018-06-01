@@ -635,5 +635,5 @@ def test_attack():
 
     print("Passed!")
 
-test_combatant()
-# test_attack()
+# test_combatant()
+test_attack()

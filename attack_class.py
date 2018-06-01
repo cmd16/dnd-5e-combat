@@ -83,7 +83,7 @@ class Attack:
             if verbose:
                 print("%s attacks %s with %s and rolls a %d." % (source.get_name(), target.get_name(), self._name,
                                                                   result[0]), end=" ")
-            if self.does_attack_hit(target, result):  # take_attack returns True if attack hits
+            if target.take_attack(result):  # take_attack returns True if attack hits
                 if verbose:
                     if result[1] == 1:
                         print("Critical hit!", end=" ")  # leave room for damage info
@@ -98,12 +98,6 @@ class Attack:
                         print("Miss.")
         except NameError:
             raise ValueError("%s tried to attack something that can't take attacks" % source._name)
-
-    def does_attack_hit(self, target, attack_result):
-        hit_val, crit_val = attack_result
-        if crit_val == -1:  # critical fails auto-miss
-            return False
-        return hit_val >= target.get_ac()
 
     def send_damage(self, target, source=None, crit=0):
         damage = self.roll_damage(crit=crit)

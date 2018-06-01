@@ -363,6 +363,12 @@ class Combatant:
         except:
             raise ValueError("%s tried to make an attack with something that can't make attacks" % self._name)
 
+    def take_attack(self, attack_result):
+        hit_val, crit_val = attack_result
+        if crit_val == -1:  # critical fails auto-miss
+            return False
+        return hit_val >= self._ac
+
     def take_damage(self, damage):
         if self._verbose:
             print("%s takes %d damage" % (self._name, damage))
