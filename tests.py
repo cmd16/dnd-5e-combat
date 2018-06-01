@@ -3,6 +3,7 @@ import weapons
 import attack_class
 from utility_methods_dnd import ability_to_mod, validate_dice
 from nltk import FreqDist
+import random
 
 def test_all():
     test_utility()
@@ -11,6 +12,7 @@ def test_all():
     test_character()
     test_weapon()
     test_attack()
+    test_saving_throw_attack()
 
 def test_utility():
     print("Testing utility methods")
@@ -633,7 +635,37 @@ def test_attack():
     t0.set_verbose(False)
     t1.set_verbose(False)
 
+def test_saving_throw_attack():
+    mace_2 = weapons.Weapon(name="mace", damage_dice=(1, 6), damage_type="bludgeoning")
+
+    # Attack of the clones!
+    t2 = combatant.Combatant(ac=12, max_hp=60, current_hp=60, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             name='t2', verbose=True)
+    t2.add_weapon(mace_2)
+
+    t3 = combatant.Combatant(copy=t2, name="t3")
+    mace_3 = weapons.Weapon(copy=mace_2)
+    t3.add_weapon(mace_3)
+
+    sunburn_2 = attack_class.SavingThrowAttack((1,8), 12, "dexterity", damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="",
+                                                  name="Sunburn")
+    sunburn_3 = attack_class.SavingThrowAttack((1,8), 12, "dexterity", damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="",
+                                                  name="Sunburn")  # TODO: make copy constructor for Attack
+
+    t2.add_attack(sunburn_2)
+    t2_attacks = t2.get_attacks()
+    t3.add_attack(sunburn_3)
+    t3_attacks = t3.get_attacks()
+
+    for i in range(30):
+        t2.send_attack(t3, random.choice(t2_attacks))
+        if t3.has_condition("unconscious") or t3.has_condition("dead"):
+            break
+        t3.send_attack(t2, random.choice(t3_attacks))
+        if t2.has_condition("unconscious") or t2.has_condition("dead"):
+            break
+
     print("Passed!")
 
-# test_combatant()
-test_attack()
+test_saving_throw_attack()

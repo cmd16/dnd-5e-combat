@@ -89,7 +89,7 @@ class Attack:
                         print("Critical hit!", end=" ")  # leave room for damage info
                     else:
                         print("Hit!", end=" ")
-                self.send_damage(target, source=source, crit=result[1])
+                self.send_damage(target, crit=result[1])
             else:
                 if verbose:
                     if result[1] == -1:
@@ -99,41 +99,51 @@ class Attack:
         except NameError:
             raise ValueError("%s tried to attack something that can't take attacks" % source._name)
 
-    def send_damage(self, target, source=None, crit=0):
+    def send_damage(self, target, crit=0):
         damage = self.roll_damage(crit=crit)
         target.take_damage(damage)
 
 class SavingThrowAttack(Attack):
-    def __init__(self, damage_dice, dc, damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
+    def __init__(self, damage_dice, dc, save_type, damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
                  weapon=None):
         super().__init__(damage_dice, attack_mod, damage_mod=damage_mod, damage_type=damage_type, range=range,
                          melee_range=melee_range, adv=adv, name=name, weapon=weapon)
         self._dc = dc
+        if save_type in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]:
+            self._save_type = save_type
+        else:
+            raise ValueError("Save type must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
         self._damage_on_success = damage_on_success  # half damage on successful save
 
     def get_dc(self):
         return self._dc
 
+    def get_save_type(self):
+        return self._save_type
+
     def get_damage_on_success(self):
         return self._damage_on_success
 
-    # def make_attack(self, source, target, adv=0):
-    #     verbose = source.get_verbose()
-    #     try:
-    #         if verbose:
-    #             print("%s attacks %s with %s." % (source.get_name(), target.get_name(), self._name))
-    #         if target.take_attack(result):  # take_attack returns True if attack hits
-    #             if verbose:
-    #                 if result[1] == 1:
-    #                     print("Critical hit!", end=" ")  # leave room for damage info
-    #                 else:
-    #                     print("Hit!", end=" ")
-    #             self.send_damage(target, source=source, crit=result[1])
-    #         else:
-    #             if verbose:
-    #                 if result[1] == -1:
-    #                     print("Critical miss.")
-    #                 else:
-    #                     print("Miss.")
-    #     except NameError:
-    #         raise ValueError("%s tried to attack something that can't take attacks" % source._name)
+    def make_attack(self, source, target, adv=0):
+        verbose = source.get_verbose()
+        try:
+            if verbose:
+                print("%s attacks %s with %s." % (source.get_name(), target.get_name(), self._name), end=" ")
+            if target.take_saving_throw(self._save_type, self._dc, self):  # take_saving_throw returns True if target made the save
+                if verbose:
+                    print("%s saves." % target.get_name())
+                self.send_damage(target, saved=True)
+            else:
+                if verbose:
+                    print("%s fails!" % target.get_name())
+                self.send_damage(target)
+
+        except NameError:
+            raise ValueError("%s tried to attack something that can't take attacks" % source._name)
+
+    def send_damage(self, target, saved=False):
+        damage = self.roll_damage()
+        if not saved:
+            target.take_damage(damage)
+        elif self._damage_on_success:
+            target.take_damage(damage//2)

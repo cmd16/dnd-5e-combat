@@ -25,7 +25,7 @@ def validate_dice(dice):
         raise ValueError("Must provide damage dice in tuple of two ints (1, 6) or string format 1d6")
     return dice
 
-def roll_dice(dice_type, num=1, modifier=0, adv=0, critable=0):  # -1 for disadvantage, 0 for normal, 1 for advantage
+def roll_dice(dice_type, num=1, modifier=0, adv=0, critable=False):  # -1 for disadvantage, 0 for normal, 1 for advantage
     roll_val = 0
     nat_roll = 0
     crit = 0

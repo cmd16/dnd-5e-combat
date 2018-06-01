@@ -21,7 +21,7 @@ features (add later)
 import warnings
 import weapons
 import attack_class
-from utility_methods_dnd import ability_to_mod, validate_dice, cr_to_xp
+from utility_methods_dnd import ability_to_mod, validate_dice, roll_dice, cr_to_xp
 
 class Combatant:
     def __init__(self, **kwargs):
@@ -128,6 +128,15 @@ class Combatant:
             return
         if not isinstance(other, Combatant):
             raise ValueError("Cannot make self a copy of something that is not a Combatant")
+
+        self._verbose = other.get_verbose()
+        self._verbose = other.get_verbose()
+
+        if not name:
+            self._name = other.get_name()
+        else:
+            self._name = name
+
         self._ac = other.get_ac()
         self._max_hp = other.get_max_hp()
         self._temp_hp = other.get_temp_hp()
@@ -171,13 +180,6 @@ class Combatant:
             self.add_weapon(weapons.Weapon(copy=weapon))
 
         self._items = other.get_items()
-
-        if not name:
-            self._name = other.get_name()
-        else:
-            self._name = name
-
-        self._verbose = other.get_verbose()
 
     def get_ac(self):
         return self._ac
@@ -320,16 +322,21 @@ class Combatant:
         attack_mod = weapon.get_hit_bonus() + mod
         damage_mod = weapon.get_damage_bonus() + mod
         if weapon.get_range():
-            self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+            self.add_attack(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_range" % weapon.get_name(), damage_type=weapon.get_damage_type(),
                                                 range=weapon.get_range()[0], weapon=weapon))
-            self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
+            self.add_attack(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_range_disadvantage" % weapon.get_name(), damage_type=weapon.get_damage_type(),
                                                 range=weapon.get_range()[1], adv=-1, weapon=weapon))
         if weapon.get_melee_range():
             self._attacks.append(attack_class.Attack(damage_dice=weapon.get_damage_dice(), attack_mod=attack_mod, damage_mod=damage_mod,
                                      name="%s_melee" % weapon.get_name(), damage_type=weapon.get_damage_type(),
                                     melee_range=weapon.get_melee_range(), weapon=weapon))
+
+    def add_attack(self, attack):
+        if attack in self._attacks:
+            pass
+        self._attacks.append(attack)
 
     def remove_weapon_attacks(self, weapon):
         self._attacks[:] = [attack for attack in self._attacks if attack.get_weapon() is not weapon]
@@ -368,6 +375,16 @@ class Combatant:
         if crit_val == -1:  # critical fails auto-miss
             return False
         return hit_val >= self._ac
+
+    def take_saving_throw(self, save_type, dc, attack):  # attack just there in case it's useful later
+        return self.make_saving_throw(save_type) >= dc
+
+    def make_saving_throw(self, save_type):
+        modifier = self.get_saving_throw(save_type)
+        result = roll_dice(dice_type=20, modifier=modifier)[0]
+        if self._verbose:
+            print("%s rolls a %d." % (self._name, result), end=" ")
+        return result
 
     def take_damage(self, damage):
         if self._verbose:
