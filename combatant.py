@@ -30,6 +30,9 @@ class Combatant:
             self.make_me_a_copy(combatant_copy, name=kwargs.get("name"))
             return
         combatant_copy = kwargs.get("clean_copy")
+
+        self._verbose = kwargs.get("verbose", False)
+
         self._ac = kwargs.get('ac')
         if not self._ac or not isinstance(self._ac, int):  # TODO: include threshold
             raise ValueError("Must provide ac as an integer")
@@ -84,7 +87,18 @@ class Combatant:
         if not charisma:
             raise ValueError("Must provide charisma score")
         self._charisma = ability_to_mod(charisma)
-        self._proficiencies = kwargs.get('proficiencies', {})  # TODO: implement
+        self._proficiencies = kwargs.get('proficiencies', [])  # TODO: implement
+        if not isinstance(self._proficiencies, (list, tuple)):
+            raise ValueError("Proficiencies must be provided as a list or tuple")
+
+        self._proficiency_mod = kwargs.get("proficiency_mod", 0)
+
+        self._saving_throws = {"strength": self._strength, "dexterity": self._dexterity, "constitution": self._constitution, "intelligence": self._intelligence,
+                               "wisdom": self._wisdom, "charisma": self._charisma}
+        for ability in self._saving_throws:
+            if ability in self._proficiencies:
+                self._saving_throws[ability] += self._proficiency_mod
+
         self._features = kwargs.get('features', [])  # TODO: implement
 
         self._death_saves = kwargs.get('death_saves', [])  # TODO: implement
@@ -103,8 +117,6 @@ class Combatant:
         self._name = kwargs.get('name')
         if not self._name:
             raise ValueError("Must provide a name")
-
-        self._verbose = kwargs.get("verbose", False)
 
     def make_me_a_copy(self, other, name=""):
         """
@@ -139,6 +151,15 @@ class Combatant:
         self._charisma = other.get_charisma()
 
         self._proficiencies = other.get_proficiencies()
+        self._proficiency_mod = other.get_proficiency_mod()
+
+        self._saving_throws = {"strength": self._strength, "dexterity": self._dexterity,
+                               "constitution": self._constitution, "intelligence": self._intelligence,
+                               "wisdom": self._wisdom, "charisma": self._charisma}
+        for ability in self._saving_throws:
+            if ability in self._proficiencies:
+                self._saving_throws[ability] += self._proficiency_mod
+
         self._features = other.get_features()
 
         self._death_saves = other.get_death_saves()
@@ -155,6 +176,8 @@ class Combatant:
             self._name = other.get_name()
         else:
             self._name = name
+
+        self._verbose = other.get_verbose()
 
     def get_ac(self):
         return self._ac
@@ -218,6 +241,15 @@ class Combatant:
 
     def get_proficiencies(self):
         return self._proficiencies
+
+    def get_proficiency_mod(self):
+        return self._proficiency_mod
+
+    def get_saving_throw(self, ability):
+        try:
+            return self._saving_throws[ability]
+        except KeyError:
+            raise ValueError("Asked for a saving throw that is not an ability score")
 
     def get_features(self):
         return self._features

@@ -63,7 +63,8 @@ def test_combatant():
     print("Testing Combatant")
 
     t0 = combatant.Combatant(ac=12, max_hp=20, current_hp=20, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
-                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8, name='t0')
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             proficiencies=["dexterity", "charisma"], proficiency_mod=2, name='t0')
     assert(t0.get_name() == 't0')
     assert(t0.get_ac() == 12)
     assert(t0.get_max_hp() == 20)
@@ -78,7 +79,14 @@ def test_combatant():
     assert(t0.get_intelligence() == 1)
     assert(t0.get_wisdom() == 0)
     assert(t0.get_charisma() == -1)
-    assert(not t0.get_proficiencies())
+    assert(t0.get_proficiencies() == ["dexterity", "charisma"])
+    assert(t0.get_proficiency_mod() == 2)
+    assert(t0.get_saving_throw("strength") == 2)
+    assert (t0.get_saving_throw("dexterity") == 5)
+    assert (t0.get_saving_throw("constitution") == -1)
+    assert (t0.get_saving_throw("intelligence") == 1)
+    assert (t0.get_saving_throw("wisdom") == 0)
+    assert (t0.get_saving_throw("charisma") == 1)
     assert(not t0.get_features())
     assert(not t0.get_death_saves())
     assert(not t0.get_conditions())
@@ -100,7 +108,14 @@ def test_combatant():
     assert(t10.get_intelligence() == 1)
     assert(t10.get_wisdom() == 0)
     assert(t10.get_charisma() == -1)
-    assert(not t10.get_proficiencies())
+    assert(t10.get_proficiencies() == ["dexterity", "charisma"])
+    assert(t10.get_proficiency_mod() == 2)
+    assert(t10.get_saving_throw("strength") == 2)
+    assert(t10.get_saving_throw("dexterity") == 5)
+    assert(t10.get_saving_throw("constitution") == -1)
+    assert(t10.get_saving_throw("intelligence") == 1)
+    assert(t10.get_saving_throw("wisdom") == 0)
+    assert(t10.get_saving_throw("charisma") == 1)
     assert(not t10.get_features())
     assert(not t10.get_death_saves())
     assert(not t10.get_conditions())
@@ -620,4 +635,5 @@ def test_attack():
 
     print("Passed!")
 
-test_attack()
+test_combatant()
+# test_attack()
