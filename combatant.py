@@ -180,7 +180,7 @@ class Combatant:
         if not name or not isinstance(name, str):
             name = other.get_name()
 
-        self.__init__(verbose=other.get_verbose(), max_hp=other.get_max_hp(), temp_hp=other.get_temp_hp(),
+        Combatant.__init__(self=self, verbose=other.get_verbose(), max_hp=other.get_max_hp(), temp_hp=other.get_temp_hp(),
                       conditions=other.get_conditions()[:], current_hp=other.get_current_hp(), hit_dice=other.get_hit_dice(),
                       speed=other.get_speed(), vision=other.get_vision(), strength_mod=other.get_strength(),
                       dexterity_mod=other.get_dexterity(), constitution_mod=other.get_constitution(),

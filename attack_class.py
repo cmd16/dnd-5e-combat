@@ -1,10 +1,15 @@
+import warnings
 from utility_methods_dnd import roll_dice, validate_dice, calc_advantage
 import weapons
 
 class Attack:
-    def __init__(self, damage_dice, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
-                 weapon=None):
-        self._damage_dice = validate_dice(damage_dice)
+    def __init__(self, damage_dice=None, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
+                 weapon=None, copy=None):
+        if copy:
+            self.copy_constructor(other=copy, name=name)
+            return
+
+        self._damage_dice = validate_dice(damage_dice)  # providing no dice will be handled by validate_dice
         if not isinstance(attack_mod, int):
             raise ValueError("Attack mod should be an integer")
         self._attack_mod = attack_mod
@@ -39,6 +44,22 @@ class Attack:
             raise ValueError("Weapon should be a Weapon object")
         else:
             self._weapon = None
+
+    def copy_constructor(self, other, name=""):
+        if other == self:  # don't bother copying yourself
+            return
+        if not isinstance(other, Attack):
+            raise ValueError("Cannot make self a copy of something that is not an Attack")
+
+        if other.get_weapon():
+            warnings.warn("Not recommended to copy an attack tied to a weapon. Copy the weapon itself and assign it to a person.")
+
+        if not name or not isinstance(name, str):
+            name = other.get_name()
+
+        Attack.__init__(self=self, damage_dice=other.get_damage_dice(), attack_mod=other.get_attack_mod(), damage_mod=other.get_damage_mod(),
+                      damage_type=other.get_damage_type(), range=other.get_range(), melee_range=other.get_melee_range(),
+                      adv=other.get_adv(), name=name, weapon=other.get_weapon())
 
     def get_damage_dice(self):
         return self._damage_dice
@@ -104,16 +125,35 @@ class Attack:
         target.take_damage(damage)
 
 class SavingThrowAttack(Attack):
-    def __init__(self, damage_dice, dc, save_type, damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
-                 weapon=None):
+    def __init__(self, copy=None, damage_dice=None, dc=None, save_type="", damage_on_success=False, attack_mod=0,
+                 damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="", weapon=None):
+        if copy:
+            self.copy_constructor(other=copy, name=name)
+            return
+
         super().__init__(damage_dice, attack_mod, damage_mod=damage_mod, damage_type=damage_type, range=range,
                          melee_range=melee_range, adv=adv, name=name, weapon=weapon)
+        if not dc or not isinstance(dc, int):
+            raise ValueError("Must provide DC (an int)")
         self._dc = dc
         if save_type in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]:
             self._save_type = save_type
         else:
             raise ValueError("Save type must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
         self._damage_on_success = damage_on_success  # half damage on successful save
+
+    def copy_constructor(self, other, name=""):
+        super().copy_constructor(other, name)
+        dc = other.get_dc()
+        if not dc or not isinstance(dc, int):
+            raise ValueError("Must provide DC (an int)")
+        self._dc = dc
+        save_type = other.get_save_type()
+        if save_type in ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]:
+            self._save_type = save_type
+        else:
+            raise ValueError("Save type must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
+        self._damage_on_success = other.get_damage_on_success()  # half damage on successful save
 
     def get_dc(self):
         return self._dc

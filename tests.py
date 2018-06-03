@@ -548,6 +548,17 @@ def test_attack():
     assert(dagger_attack.get_melee_range() == 0)
     assert(dagger_attack.get_adv() == 0)
 
+    dagger_attack = attack_class.Attack(copy=dagger_attack)
+    assert(dagger_attack.get_name() == "dagger_range")
+    assert(dagger_attack.get_weapon() is dagger)
+    assert(dagger_attack.get_damage_dice() == (1, 4))
+    assert(dagger_attack.get_damage_type() == "piercing")
+    assert(dagger_attack.get_attack_mod() == 5)  # 3 + 2
+    assert(dagger_attack.get_damage_mod() == 4)  # 3 + 1
+    assert(dagger_attack.get_range() == 20)
+    assert(dagger_attack.get_melee_range() == 0)
+    assert(dagger_attack.get_adv() == 0)
+
     dagger_attack = dagger_attacks[1]
     assert(dagger_attack.get_name() == "dagger_range_disadvantage")
     assert(dagger_attack.get_damage_dice() == (1, 4))
@@ -648,10 +659,25 @@ def test_saving_throw_attack():
     mace_3 = weapons.Weapon(copy=mace_2)
     t3.add_weapon(mace_3)
 
-    sunburn_2 = attack_class.SavingThrowAttack((1,8), 12, "dexterity", damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="",
-                                                  name="Sunburn")
-    sunburn_3 = attack_class.SavingThrowAttack((1,8), 12, "dexterity", damage_on_success=False, attack_mod=0, damage_mod=0, damage_type="",
-                                                  name="Sunburn")  # TODO: make copy constructor for Attack
+    sunburn_2 = attack_class.SavingThrowAttack(damage_dice=(1, 8), dc=12, save_type="dexterity", damage_on_success=False,
+                                               attack_mod=0, damage_mod=0, damage_type="radiant", name="Sunburn")
+    assert(sunburn_2.get_damage_dice() == (1, 8))
+    assert(sunburn_2.get_dc() == 12)
+    assert(sunburn_2.get_save_type() == "dexterity")
+    assert(not sunburn_2.get_damage_on_success())
+    assert(sunburn_2.get_attack_mod() == 0)
+    assert(sunburn_2.get_damage_mod() == 0)
+    assert(sunburn_2.get_damage_type() == "radiant")
+    assert(sunburn_2.get_name() == "Sunburn")
+    sunburn_3 = attack_class.SavingThrowAttack(copy=sunburn_2)
+    assert (sunburn_3.get_damage_dice() == (1, 8))
+    assert (sunburn_3.get_dc() == 12)
+    assert (sunburn_3.get_save_type() == "dexterity")
+    assert (not sunburn_3.get_damage_on_success())
+    assert (sunburn_3.get_attack_mod() == 0)
+    assert (sunburn_3.get_damage_mod() == 0)
+    assert (sunburn_3.get_damage_type() == "radiant")
+    assert (sunburn_3.get_name() == "Sunburn")
 
     t2.add_attack(sunburn_2)
     t2_attacks = t2.get_attacks()
@@ -668,4 +694,5 @@ def test_saving_throw_attack():
 
     print("Passed!")
 
-test_combatant()
+test_attack()
+test_saving_throw_attack()
