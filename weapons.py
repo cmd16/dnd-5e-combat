@@ -76,25 +76,13 @@ class Weapon:
             return
         if not isinstance(other, Weapon):
             raise ValueError("Cannot make self a copy of something that is not a Weapon")
-        self._range = other.get_range()
-        self._melee_range = other.get_melee_range()
-        self._props = other.get_properties()
-        self._finesse = 'finesse' in self._props
-        self._light = "light" in self._props
-        self._heavy = "heavy" in self._props
-        self._load = "load" in self._props
-        self._reach = "reach" in self._props
-        self._two_handed = "two_handed" in self._props
-        self._versatile = "versatile" in self._props
-        self._damage_dice = other.get_damage_dice()
-        self._damage_type = other.get_damage_type()
-        if not name:
-            self._name = other.get_name()  # TODO: keep same name?
-        else:
-            self._name = name
-        self._owner = None
-        self._hit_bonus = other.get_hit_bonus()
-        self._damage_bonus = other.get_damage_bonus()
+        if not name or not isinstance(name, str):
+            name = other.get_name()
+        self.__init__(range=other.get_range(), melee_range=other.get_melee_range(), finesse=other.has_prop("finesse"),
+                      light=other.has_prop("light"), heavy=other.has_prop("heavy"), load=other.has_prop("load"),
+                      reach=other.has_prop("reach"), two_handed=other.has_prop("two_handed"), versatile=other.has_prop("versatile"),
+                      damage_dice=other.get_damage_dice(), damage_type=other.get_damage_type(), name=name,
+                      hit_bonus=other.get_hit_bonus(), damage_bonus=other.get_damage_bonus())
 
     def get_properties(self):
         props = []

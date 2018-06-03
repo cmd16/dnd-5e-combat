@@ -29,7 +29,6 @@ class Combatant:
         if combatant_copy:
             self.copy_constructor(combatant_copy, name=kwargs.get("name"))
             return
-        combatant_copy = kwargs.get("clean_copy")
 
         self._verbose = kwargs.get("verbose", False)
 
@@ -45,7 +44,7 @@ class Combatant:
         if not isinstance(self._conditions, list):
             raise ValueError("If conditions provided, must be a list")
 
-        self._current_hp = kwargs.get('current_hp', 0)
+        self._current_hp = kwargs.get('current_hp', self._max_hp)  # by default, start with max hp
         if not isinstance(self._current_hp, int):
             raise ValueError("Must provide non-negative integer for current hp")
         if self._current_hp <= 0:
@@ -65,28 +64,77 @@ class Combatant:
 
         strength = kwargs.get('strength')
         if not strength:
-            raise ValueError("Must provide strength score")
-        self._strength = ability_to_mod(strength)
+            strength_mod = kwargs.get("strength_mod")
+            if strength_mod is not None:
+                if isinstance(strength_mod, int):
+                    self._strength = strength_mod
+                else:
+                    raise ValueError("Strength mod must be an integer")
+            else:
+                raise ValueError("Must provide strength score or modifier")
+        else:
+            self._strength = ability_to_mod(strength)
+
         dexterity = kwargs.get('dexterity')
         if not dexterity:
-            raise ValueError("Must provide dexterity score")
-        self._dexterity = ability_to_mod(dexterity)
+            dexterity_mod = kwargs.get("dexterity_mod")
+            if dexterity_mod is not None:
+                if isinstance(dexterity_mod, int):
+                    self._dexterity = dexterity_mod
+                else:
+                    raise ValueError("Dexterity mod must be an integer")
+            else:
+                raise ValueError("Must provide dexterity score or modifier")
+        else:
+            self._dexterity = ability_to_mod(dexterity)
         constitution = kwargs.get('constitution')
         if not constitution:
-            raise ValueError("Must provide constitution score")
-        self._constitution = ability_to_mod(constitution)
+            constitution_mod = kwargs.get("constitution_mod")
+            if constitution_mod is not None:
+                if isinstance(constitution_mod, int):
+                    self._constitution = constitution_mod
+                else:
+                    raise ValueError("Constitution mod must be an integer")
+            else:
+                raise ValueError("Must provide constitution score or modifier")
+        else:
+            self._constitution = ability_to_mod(constitution)
         intelligence = kwargs.get('intelligence')
         if not intelligence:
-            raise ValueError("Must provide intelligence score")
-        self._intelligence = ability_to_mod(intelligence)
+            intelligence_mod = kwargs.get("intelligence_mod")
+            if intelligence_mod is not None:
+                if isinstance(intelligence_mod, int):
+                    self._intelligence = intelligence_mod
+                else:
+                    raise ValueError("Intelligence mod must be an integer")
+            else:
+                raise ValueError("Must provide intelligence score or modifier")
+        else:
+            self._intelligence = ability_to_mod(intelligence)
         wisdom = kwargs.get('wisdom')
         if not wisdom:
-            raise ValueError("Must provide wisdom score")
-        self._wisdom = ability_to_mod(wisdom)
+            wisdom_mod = kwargs.get("wisdom_mod")
+            if wisdom_mod is not None:
+                if isinstance(wisdom_mod, int):
+                    self._wisdom = wisdom_mod
+                else:
+                    raise ValueError("Wisdom mod must be an integer")
+            else:
+                raise ValueError("Must provide wisdom score or modifier")
+        else:
+            self._wisdom = ability_to_mod(wisdom)
         charisma = kwargs.get('charisma')
         if not charisma:
-            raise ValueError("Must provide charisma score")
-        self._charisma = ability_to_mod(charisma)
+            charisma_mod = kwargs.get("charisma_mod")
+            if charisma_mod is not None:
+                if isinstance(charisma_mod, int):
+                    self._charisma = charisma_mod
+                else:
+                    raise ValueError("Charisma mod must be an integer")
+            else:
+                raise ValueError("Must provide charisma score or modifier")
+        else:
+            self._charisma = ability_to_mod(charisma)
         self._proficiencies = kwargs.get('proficiencies', [])  # TODO: implement
         if not isinstance(self._proficiencies, (list, tuple)):
             raise ValueError("Proficiencies must be provided as a list or tuple")
@@ -129,57 +177,19 @@ class Combatant:
         if not isinstance(other, Combatant):
             raise ValueError("Cannot make self a copy of something that is not a Combatant")
 
-        self._verbose = other.get_verbose()
-        self._verbose = other.get_verbose()
+        if not name or not isinstance(name, str):
+            name = other.get_name()
 
-        if not name:
-            self._name = other.get_name()
-        else:
-            self._name = name
+        self.__init__(verbose=other.get_verbose(), max_hp=other.get_max_hp(), temp_hp=other.get_temp_hp(),
+                      conditions=other.get_conditions()[:], current_hp=other.get_current_hp(), hit_dice=other.get_hit_dice(),
+                      speed=other.get_speed(), vision=other.get_vision(), strength_mod=other.get_strength(),
+                      dexterity_mod=other.get_dexterity(), constitution_mod=other.get_constitution(),
+                      intelligence_mod=other.get_intelligence(), wisdom_mod=other.get_wisdom(), charisma_mod=other.get_charisma(),
+                      proficiencies=other.get_proficiencies(), proficiency_mod=other.get_proficiency_mod(),
+                      features=other.get_features(), death_saves=other.get_death_saves(), ac=other.get_ac(), name=name)
 
-        self._ac = other.get_ac()
-        self._max_hp = other.get_max_hp()
-        self._temp_hp = other.get_temp_hp()
-
-        self._conditions = other.get_conditions()  # set this first in case current hp makes character unconscious
-
-        self._current_hp = other.get_current_hp()
-        if self._current_hp <= 0:
-            warnings.warn("Combatant created with 0 or less hp. Going unconscious (and setting hp to 0).")
-            self.become_unconscious()
-
-        self._hit_dice = other.get_hit_dice()
-        self._speed = other.get_speed()
-        self._vision = other.get_vision()
-
-        self._strength = other.get_strength()
-        self._dexterity = other.get_dexterity()
-        self._constitution = other.get_constitution()
-        self._intelligence = other.get_intelligence()
-        self._wisdom = other.get_wisdom()
-        self._charisma = other.get_charisma()
-
-        self._proficiencies = other.get_proficiencies()
-        self._proficiency_mod = other.get_proficiency_mod()
-
-        self._saving_throws = {"strength": self._strength, "dexterity": self._dexterity,
-                               "constitution": self._constitution, "intelligence": self._intelligence,
-                               "wisdom": self._wisdom, "charisma": self._charisma}
-        for ability in self._saving_throws:
-            if ability in self._proficiencies:
-                self._saving_throws[ability] += self._proficiency_mod
-
-        self._features = other.get_features()
-
-        self._death_saves = other.get_death_saves()
-
-        self._attacks = []
-
-        self._weapons = []
         for weapon in other.get_weapons():
             self.add_weapon(weapons.Weapon(copy=weapon))
-
-        self._items = other.get_items()
 
     def get_ac(self):
         return self._ac

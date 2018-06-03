@@ -668,4 +668,4 @@ def test_saving_throw_attack():
 
     print("Passed!")
 
-test_saving_throw_attack()
+test_combatant()
