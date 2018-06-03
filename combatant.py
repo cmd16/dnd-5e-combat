@@ -64,7 +64,7 @@ class Combatant:
 
         strength = kwargs.get('strength')
         if not strength:
-            strength_mod = kwargs.get("strength_mod")
+            strength_mod = kwargs.get("strength_mod")  # modifiers also accepted
             if strength_mod is not None:
                 if isinstance(strength_mod, int):
                     self._strength = strength_mod
