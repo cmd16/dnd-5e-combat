@@ -5,7 +5,7 @@ class Weapon:
     def __init__(self, **kwargs):
         copy_weapon = kwargs.get("copy")
         if copy_weapon:
-            self.make_me_a_copy(copy_weapon, name=kwargs.get("name"))
+            self.copy_constructor(copy_weapon, name=kwargs.get("name"))
             return
         self._finesse = kwargs.get('finesse', 0)
         self._light = kwargs.get('light', 0)
@@ -66,7 +66,7 @@ class Weapon:
         self._hit_bonus = kwargs.get('hit_bonus', 0)
         self._damage_bonus = kwargs.get('damage_bonus', 0)
 
-    def make_me_a_copy(self, other, name=""):
+    def copy_constructor(self, other, name=""):
         """
         Sets instance variables from another Weapon. Warning: this overrides any existing values in self.
         :param other: another Weapon

@@ -27,7 +27,7 @@ class Combatant:
     def __init__(self, **kwargs):
         combatant_copy = kwargs.get("copy")
         if combatant_copy:
-            self.make_me_a_copy(combatant_copy, name=kwargs.get("name"))
+            self.copy_constructor(combatant_copy, name=kwargs.get("name"))
             return
         combatant_copy = kwargs.get("clean_copy")
 
@@ -118,7 +118,7 @@ class Combatant:
         if not self._name:
             raise ValueError("Must provide a name")
 
-    def make_me_a_copy(self, other, name=""):
+    def copy_constructor(self, other, name=""):
         """
         Sets instance variables from another Combatant. Warning: this overrides any existing values in self.
         :param other: another Combatant
@@ -422,10 +422,10 @@ class Combatant:
 
 class Creature(Combatant):
     def __init__(self, **kwargs):
-        # do this before super so that there aren't multiple calls to make_me_a_copy
+        # do this before super so that there aren't multiple calls to copy_constructor
         copy_creature = kwargs.get("copy")
         if copy_creature:
-            self.make_me_a_copy(copy_creature, name=kwargs.get("name"), cr=kwargs.get("cr"), xp=kwargs.get("xp"))
+            self.copy_constructor(copy_creature, name=kwargs.get("name"), cr=kwargs.get("cr"), xp=kwargs.get("xp"))
             return
         super().__init__(**kwargs)
         self._cr = kwargs.get("cr", 0)
@@ -433,8 +433,8 @@ class Creature(Combatant):
             raise ValueError("Challenge rating must be a non-negative number")
         self._xp = kwargs.get("xp", cr_to_xp(self._cr))
 
-    def make_me_a_copy(self, other, name="", cr=0, xp=0):
-        super().make_me_a_copy(other, name)
+    def copy_constructor(self, other, name="", cr=0, xp=0):
+        super().copy_constructor(other, name)
         if isinstance(other, Creature):
             self._cr = other.get_cr()
             self._xp = other.get_xp()
@@ -459,7 +459,7 @@ class Character(Combatant):
     def __init__(self, **kwargs):
         copy_character = kwargs.get("copy")
         if copy_character:
-            self.make_me_a_copy(copy_character, name=kwargs.get("name"), level=kwargs.get("level"))
+            self.copy_constructor(copy_character, name=kwargs.get("name"), level=kwargs.get("level"))
             return
         super().__init__(**kwargs)
         self._level = kwargs.get("level")
@@ -468,8 +468,8 @@ class Character(Combatant):
         if not isinstance(self._level, int) or self._level < 1 or self._level > 20:
             raise ValueError("Level must be an integer between 1 and 20")
 
-    def make_me_a_copy(self, other, name="", level=0):
-        super().make_me_a_copy(other, name)
+    def copy_constructor(self, other, name="", level=0):
+        super().copy_constructor(other, name)
         self._level = level
         if isinstance(other, Character):
             self._level = other.get_level()
