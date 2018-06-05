@@ -550,9 +550,11 @@ class SpellCaster(Combatant):
             raise ValueError("Spells must be a list or tuple")
         else:
             for spell in spells:
-                if not isinstance(spell, attack_class.Spell):
+                try:
+                    self.add_spell(spell)
+                except ValueError:
                     raise ValueError("Spells must contain only Spell objects")
-                self.add_spell(spell)
+
 
     def copy_constructor(self, other, **kwargs):
         super().copy_constructor(other, name=kwargs.get("name"))
@@ -628,8 +630,10 @@ class SpellCaster(Combatant):
 
     def add_spell(self, spell):
         if isinstance(spell, attack_class.Spell):
+            spell.set_attack_mod(self._spell_attack_mod)
             self._spells.append(spell)
-            # TODO: finish this
+        else:
+            raise ValueError("Cannot add a non-Spell object as an attack.")
 
     def spend_slot(self, level):
         if not isinstance(level, int) or not (0 < level < 10):

@@ -369,10 +369,12 @@ def test_character():
     print("Passed!")
 
 def test_spellcaster():
-    # spellcaster with no spells
+    spell0 = attack_class.Spell(level=1, casting_time="1 minute", components=("v", "s"), duration="instantaneous",
+                                school="magic", damage_dice=(1, 8), range=60, name="spell0")
+
     s0 = combatant.SpellCaster(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='darkvision',
                              strength=14, dexterity=11, constitution=9, intelligence=12, wisdom=16, charisma=8, name="s0",
-                            spell_ability="wisdom", spell_slots={1:3, 2:2, 3:1}, proficiency_mod=2)
+                            spell_ability="wisdom", spell_slots={1:3, 2:2, 3:1}, proficiency_mod=2, spells=[spell0])
     assert(s0.get_spell_ability() == "wisdom")
     assert(s0.get_spell_ability_mod() == 3)
     assert(s0.get_spell_save_dc() == 13)
@@ -385,8 +387,8 @@ def test_spellcaster():
     assert(not s0.get_level_slots(3))
     s0.reset_slots()
     assert(s0.get_spell_slots() == {1:3, 2:2, 3:1})
-
-    # TODO: test adding spells
+    assert(spell0 in s0.get_spells())
+    assert(spell0.get_attack_mod() == 5)
 
 def test_weapon():
     print("Testing Weapon")
@@ -730,4 +732,4 @@ def test_spell():
     assert (spell1.get_duration() == "instantaneous")
     assert (spell1.get_school() == "magic")
 
-test_spell()
+test_spellcaster()
