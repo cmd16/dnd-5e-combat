@@ -64,3 +64,26 @@ def calc_advantage(advs):  # Note: does not sanitize input. User must use approp
         return 1
     if sum < 0:
         return -1
+
+def time_to_rounds(time_var):
+    if isinstance(time_var, str):
+        time_list = time_var.split(" ")
+        try:
+            time_list[0] = int(time_list[0])
+            if time_list[0] <= 0:
+                raise ValueError()
+        except ValueError:
+            raise ValueError("Time must be a positive integer")
+
+    elif isinstance(time_var, (tuple, list)):
+        time_list = time_var
+    else:
+        raise ValueError("Must provide string (\"1 minute\") or tuple/list (1, \"minute\")")
+    if time_list[1] not in ["minute", "minutes", "hour", "hours", "round", "rounds"]:
+        raise ValueError("Unit must be minutes, hours, or rounds; e.g., 1 minute")
+    if "round" in time_list[1]:
+        return time_list[0]
+    if "minute" in time_list[1]:
+        return time_list[0] * 10
+    if "hour" in time_list[1]:
+        return time_list[0] * 100

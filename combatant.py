@@ -87,6 +87,7 @@ class Combatant:
                 raise ValueError("Must provide dexterity score or modifier")
         else:
             self._dexterity = ability_to_mod(dexterity)
+
         constitution = kwargs.get('constitution')
         if not constitution:
             constitution_mod = kwargs.get("constitution_mod")
@@ -99,6 +100,7 @@ class Combatant:
                 raise ValueError("Must provide constitution score or modifier")
         else:
             self._constitution = ability_to_mod(constitution)
+
         intelligence = kwargs.get('intelligence')
         if not intelligence:
             intelligence_mod = kwargs.get("intelligence_mod")
@@ -111,6 +113,7 @@ class Combatant:
                 raise ValueError("Must provide intelligence score or modifier")
         else:
             self._intelligence = ability_to_mod(intelligence)
+
         wisdom = kwargs.get('wisdom')
         if not wisdom:
             wisdom_mod = kwargs.get("wisdom_mod")
@@ -123,6 +126,7 @@ class Combatant:
                 raise ValueError("Must provide wisdom score or modifier")
         else:
             self._wisdom = ability_to_mod(wisdom)
+
         charisma = kwargs.get('charisma')
         if not charisma:
             charisma_mod = kwargs.get("charisma_mod")
@@ -232,6 +236,22 @@ class Combatant:
             return True
         if light_src == "magic":
             return self._vision == "truesight"
+
+    def get_ability(self, ability):
+        if ability == "strength":
+            return self._strength
+        elif ability == "dexterity":
+            return self._dexterity
+        elif ability == "constitution":
+            return self._constitution
+        elif ability == "intelligence":
+            return self._intelligence
+        elif ability == "wisdom":
+            return self._wisdom
+        elif ability == "charisma":
+            return self._charisma
+        else:
+            raise ValueError("Ability score must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
 
     def get_strength(self):
         return self._strength
@@ -491,3 +511,138 @@ class Character(Combatant):
 
     def get_level(self):
         return self._level
+
+class SpellCaster(Combatant):
+    def __init__(self, **kwargs):
+        copy = kwargs.get("copy")
+        if copy:
+            self.copy_constructor(other=copy, **kwargs)
+            return
+
+        super().__init__(**kwargs)
+        spell_ability = kwargs.get("spell_ability", "intelligence")
+        try:
+            self._spell_ability_mod = self.get_ability(spell_ability)
+            self._spell_ability = spell_ability
+        except ValueError:
+            raise ValueError("Spell ability must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
+        self._spell_save_dc = 8 + self._proficiency_mod + self._spell_ability_mod
+        self._spell_attack_mod = self._proficiency_mod + self._spell_ability_mod
+        spell_slots = kwargs.get("spell_slots")
+        if spell_slots and not isinstance(spell_slots, dict):
+            raise ValueError("Spell slots must be a dictionary. {1: 3, 2:1} would mean 3 1st level spells and 1 2nd level spell")
+        if not spell_slots:
+            for i in range(1, 10):
+                value = kwargs.get("level_%d" % i)
+                if value:
+                    if isinstance(value, int):
+                        spell_slots[i] = value
+                    else:
+                        raise ValueError("Spell slot number for level %d must be an integer" % i)
+        self._spell_slots = spell_slots
+        self._full_spell_slots = dict()
+        self._full_spell_slots.update(self._spell_slots)
+        self._spells = []
+        spells = kwargs.get("spells")
+        if not spells:
+            warnings.warn("Created a SpellCaster with no spells")
+        elif not isinstance(spells, (list, tuple)):
+            raise ValueError("Spells must be a list or tuple")
+        else:
+            for spell in spells:
+                if not isinstance(spell, attack_class.Spell):
+                    raise ValueError("Spells must contain only Spell objects")
+                self.add_spell(spell)
+
+    def copy_constructor(self, other, **kwargs):
+        super().copy_constructor(other, name=kwargs.get("name"))
+        if isinstance(other, SpellCaster):
+            self._spell_ability = other.get_spell_ability()
+            self._spell_ability_mod = other.get_spell_ability_mod()
+            self._spell_save_dc = other.get_spell_save_dc()
+            self._spell_attack_mod = other.get_spell_attack_mod()
+            self._spell_slots = dict()
+            self._spell_slots.update(other.get_spell_slots())
+            self._spells = []
+            for spell in other.get_spells():
+                new_spell = attack_class.Spell(copy=spell)
+                self._spells.append(new_spell)
+        else:
+            spell_ability = kwargs.get("spell_ability", "intelligence")
+            try:
+                self._spell_ability_mod = self.get_ability(spell_ability)
+                self._spell_ability = spell_ability
+            except ValueError:
+                raise ValueError(
+                    "Spell ability must be strength, dexterity, constitution, intelligence, wisdom, or charisma")
+            self._spell_save_dc = 8 + self._proficiency_mod + self._spell_ability_mod
+            self._spell_attack_mod = self._proficiency_mod + self._spell_ability_mod
+            spell_slots = kwargs.get("spell_slots")
+            if spell_slots and not isinstance(spell_slots, dict):
+                raise ValueError(
+                    "Spell slots must be a dictionary. {1: 3, 2:1} would mean 3 1st level spells and 1 2nd level spell")
+            if not spell_slots:
+                for i in range(1, 10):
+                    value = kwargs.get("level_%d" % i)
+                    if value:
+                        if isinstance(value, int):
+                            spell_slots[i] = value
+                        else:
+                            raise ValueError("Spell slot number for level %d must be an integer" % i)
+            self._spell_slots = spell_slots
+            self._spells = []
+            spells = kwargs.get("spells")
+            if not spells:
+                warnings.warn("Created a SpellCaster with no spells")
+            elif not isinstance(spells, (list, tuple)):
+                raise ValueError("Spells must be a list or tuple")
+            else:
+                for spell in spells:
+                    if not isinstance(spell, attack_class.Spell):
+                        raise ValueError("Spells must contain only Spell objects")
+                    self.add_spell(attack_class.Spell(copy=spell))
+
+    def get_spell_ability(self):
+        return self._spell_ability
+
+    def get_spell_ability_mod(self):
+        return self._spell_ability_mod
+
+    def get_spell_save_dc(self):
+        return self._spell_save_dc
+
+    def get_spell_attack_mod(self):
+        return self._spell_attack_mod
+
+    def get_spell_slots(self):
+        return self._spell_slots
+
+    def get_level_slots(self, level):
+        try:
+            return self._spell_slots[level]
+        except KeyError:
+            return 0
+
+    def get_spells(self):
+        return self._spells
+
+    def add_spell(self, spell):
+        if isinstance(spell, attack_class.Spell):
+            self._spells.append(spell)
+            # TODO: finish this
+
+    def spend_slot(self, level):
+        if not isinstance(level, int) or not (0 < level < 10):
+            raise ValueError("Level must be an int between 1 and 9")
+        try:
+            if self._spell_slots[level] > 0:
+                self._spell_slots[level] -= 1
+            else:
+                raise ValueError()  # no need including a message because it is caught
+        except (KeyError, ValueError):
+            raise ValueError("%s tried to cast a level %d spell even though they don't have slots for it" % (self._name, level))
+
+    def reset_slots(self):
+        spell_slots = dict()
+        spell_slots.update(self._full_spell_slots)
+        self._spell_slots = spell_slots

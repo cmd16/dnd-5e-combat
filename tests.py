@@ -10,6 +10,7 @@ def test_all():
     test_combatant()
     test_creature()
     test_character()
+    test_spellcaster()
     test_weapon()
     test_attack()
     test_saving_throw_attack()
@@ -367,6 +368,26 @@ def test_character():
         pass
     print("Passed!")
 
+def test_spellcaster():
+    # spellcaster with no spells
+    s0 = combatant.SpellCaster(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='darkvision',
+                             strength=14, dexterity=11, constitution=9, intelligence=12, wisdom=16, charisma=8, name="s0",
+                            spell_ability="wisdom", spell_slots={1:3, 2:2, 3:1}, proficiency_mod=2)
+    assert(s0.get_spell_ability() == "wisdom")
+    assert(s0.get_spell_ability_mod() == 3)
+    assert(s0.get_spell_save_dc() == 13)
+    assert(s0.get_spell_attack_mod() == 5)
+    assert(s0.get_level_slots(1) == 3)
+    assert(s0.get_level_slots(2) == 2)
+    assert(s0.get_level_slots(3) == 1)
+    assert(s0.get_level_slots(4) == 0)
+    s0.spend_slot(3)
+    assert(not s0.get_level_slots(3))
+    s0.reset_slots()
+    assert(s0.get_spell_slots() == {1:3, 2:2, 3:1})
+
+    # TODO: test adding spells
+
 def test_weapon():
     print("Testing Weapon")
 
@@ -694,5 +715,19 @@ def test_saving_throw_attack():
 
     print("Passed!")
 
-test_attack()
-test_saving_throw_attack()
+def test_spell():
+    spell0 = attack_class.Spell(level=1, casting_time="1 minute", components=("v", "s"), duration="instantaneous",
+                                school="magic", damage_dice=(1,8), range=60, name="spell0")
+    assert(spell0.get_level() == 1)
+    assert(spell0.get_casting_time() == 10)
+    assert(spell0.get_components() == ["v", "s"])
+    assert(spell0.get_duration() == "instantaneous")
+    assert(spell0.get_school() == "magic")
+    spell1 = attack_class.Spell(copy=spell0)
+    assert (spell1.get_level() == 1)
+    assert (spell1.get_casting_time() == 10)
+    assert (spell1.get_components() == ["v", "s"])
+    assert (spell1.get_duration() == "instantaneous")
+    assert (spell1.get_school() == "magic")
+
+test_spell()

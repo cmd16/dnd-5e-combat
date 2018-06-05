@@ -1,5 +1,5 @@
 import warnings
-from utility_methods_dnd import roll_dice, validate_dice, calc_advantage
+from utility_methods_dnd import roll_dice, validate_dice, calc_advantage, time_to_rounds
 import weapons
 
 class Attack:
@@ -88,6 +88,12 @@ class Attack:
     def get_weapon(self):
         return self._weapon
 
+    def set_attack_mod(self, attack_mod):
+        if isinstance(attack_mod, int):
+            self._attack_mod = attack_mod
+        else:
+            raise ValueError("Attack mod must be an integer")
+
     def roll_attack(self, adv=0):  # adv is the additional advantage afforded by circumstance
         return roll_dice(20, adv=calc_advantage([self._adv, adv]), modifier=self._attack_mod, critable=True)
 
@@ -125,13 +131,13 @@ class Attack:
         target.take_damage(damage)
 
 class SavingThrowAttack(Attack):
-    def __init__(self, copy=None, damage_dice=None, dc=None, save_type="", damage_on_success=False, attack_mod=0,
+    def __init__(self, copy=None, damage_dice=None, dc=None, save_type="", damage_on_success=False,
                  damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="", weapon=None):
         if copy:
             self.copy_constructor(other=copy, name=name)
             return
 
-        super().__init__(damage_dice, attack_mod, damage_mod=damage_mod, damage_type=damage_type, range=range,
+        super().__init__(damage_dice=damage_dice, damage_mod=damage_mod, damage_type=damage_type, range=range,
                          melee_range=melee_range, adv=adv, name=name, weapon=weapon)
         if not dc or not isinstance(dc, int):
             raise ValueError("Must provide DC (an int)")
@@ -187,3 +193,66 @@ class SavingThrowAttack(Attack):
             target.take_damage(damage)
         elif self._damage_on_success:
             target.take_damage(damage//2)
+
+class Spell(Attack):
+    def __init__(self, level=None, school=None, casting_time=None, components=None, duration=None,  damage_dice=None,
+                 attack_mod=0, damage_mod=0, damage_type="", range=0, melee_range=0, adv=0, name="",
+                 copy=None):
+        if copy:
+            self.copy_constructor(copy, name)
+            return
+        super().__init__(damage_dice=damage_dice, attack_mod=attack_mod, damage_mod=damage_mod,
+                         damage_type=damage_type, range=range, melee_range=melee_range, adv=adv, name=name)
+        if isinstance(level, int) and 0 <= level < 10:
+            self._level = level
+        else:
+            raise ValueError("Level must be an integer between 0 and 9")
+        self._school = school  # TODO: validation
+        if casting_time == "1 action" or casting_time == "1 bonus action" or casting_time == "1 reaction":
+            self._casting_time = casting_time
+        else:
+            self._casting_time = time_to_rounds(casting_time)
+        if not isinstance(components, (list, tuple)):
+            raise ValueError("Components must be a list or tuple")
+        self._components = []
+        if "v" in components:
+            self._components.append("v")
+        if "s" in components:
+            self._components.append("s")
+        if "m" in components:
+            self._components.append("m")
+        self._duration = duration  # TODO: validation
+
+    def copy_constructor(self, other, name=""):
+        super().copy_constructor(other, name)
+        self._level = other.get_level()
+        self._school = other.get_school()  # TODO: validation
+        self._casting_time = other.get_casting_time()
+        self._components = other.get_components()[:]
+        self._duration = other.get_duration()  # TODO: validation
+
+    def get_level(self):
+        return self._level
+
+    def get_school(self):
+        return self._school
+
+    def get_casting_time(self):
+        return self._casting_time
+
+    def get_components(self):
+        return self._components
+
+    def get_duration(self):
+        return self._duration
+
+    def make_attack(self, source, target, adv=0, level=None):
+        if level is None:
+            level = self._level
+        if source.get_level_spell_slots(level) or level == 0:
+            source.spend_slot(level)
+        else:
+            if source.get_verbose():
+                print("%s tried to cast a level %d spell even though they have no slots left for it" % (source.get_name(), level))
+            return False
+        super().make_attack(source=source, target=target, adv=adv)  # To be overridden in subclasses
