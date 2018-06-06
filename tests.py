@@ -732,4 +732,25 @@ def test_spell():
     assert (spell1.get_duration() == "instantaneous")
     assert (spell1.get_school() == "magic")
 
-test_spellcaster()
+def test_saving_throw_spell():
+    sunburn0 = attack_class.SavingThrowSpell(damage_dice=(1, 8), level=0, school="evocation",
+                                             casting_time="1 action", components=["v", "s"], duration="instantaneous",
+                                             dc=12, save_type="dexterity", damage_on_success=False,
+                                             damage_type="radiant", name="Sunburn")
+    assert(sunburn0.get_damage_dice() == (1, 8))
+    assert(sunburn0.get_level() == 0)
+    assert(sunburn0.get_school() == "evocation")
+    assert(sunburn0.get_casting_time() == "1 action")
+    assert(sunburn0.get_components() == ["v", "s"])
+    assert(sunburn0.get_duration() == "instantaneous")
+    assert(sunburn0.get_dc() == 12)
+    assert(sunburn0.get_save_type() == "dexterity")
+    assert(not sunburn0.get_damage_on_success())
+    assert(sunburn0.get_attack_mod() == 0)
+    assert(sunburn0.get_damage_mod() == 0)
+    assert(sunburn0.get_damage_type() == "radiant")
+    assert(sunburn0.get_name() == "Sunburn")
+
+
+test_attack()
+test_spell()
