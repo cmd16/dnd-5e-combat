@@ -4,6 +4,7 @@ import attack_class
 from utility_methods_dnd import ability_to_mod, validate_dice
 from nltk import FreqDist
 import random
+import bestiary
 
 def test_all():
     test_utility()
@@ -800,4 +801,24 @@ def test_healing_spell():
         if t0.is_hp_max() or t1.is_hp_max():
             break
 
-test_healing_spell()
+def test_read_from_web():
+    a0 = bestiary.Aboleth(name="a0")
+    assert(isinstance(a0, combatant.Creature))
+    assert(isinstance(a0, bestiary.Aboleth))
+    assert(a0.get_name() == "a0")
+    assert(a0.get_ac() == 17)
+    assert(a0.get_max_hp() == 135)
+    assert(a0.get_current_hp() == 135)
+    assert(a0.get_speed() == 10)
+    assert(a0.get_strength() == 5)
+    assert(a0.get_dexterity() == -1)
+    assert(a0.get_constitution() == 2)
+    assert(a0.get_intelligence() == 4)
+    assert(a0.get_wisdom() == 2)
+    assert(a0.get_charisma() == 4)
+    assert(a0.get_saving_throw("constitution") == 6)
+    assert(a0.get_saving_throw("intelligence") == 8)
+    assert(a0.get_saving_throw("wisdom") == 6)
+    assert(a0.get_cr() == 10)
+
+test_read_from_web()

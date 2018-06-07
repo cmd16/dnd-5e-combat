@@ -57,7 +57,7 @@ class Combatant:
         if self._current_hp > self._max_hp:
             raise ValueError("Current hp cannot be greater than max hp. Use temp hp if needed.")
 
-        self._hit_dice = validate_dice(kwargs.get('hit_dice'))
+        # self._hit_dice = validate_dice(kwargs.get('hit_dice'))  # TODO: NOT USED CURRENTLY.
         self._speed = kwargs.get('speed', 25)
         if not isinstance(self._speed, int) or self._speed <= 0:
             raise ValueError("Speed must be a positive integer")
@@ -185,7 +185,7 @@ class Combatant:
             name = other.get_name()
 
         Combatant.__init__(self=self, verbose=other.get_verbose(), max_hp=other.get_max_hp(), temp_hp=other.get_temp_hp(),
-                      conditions=other.get_conditions()[:], current_hp=other.get_current_hp(), hit_dice=other.get_hit_dice(),
+                      conditions=other.get_conditions()[:], current_hp=other.get_current_hp(),
                       speed=other.get_speed(), vision=other.get_vision(), strength_mod=other.get_strength(),
                       dexterity_mod=other.get_dexterity(), constitution_mod=other.get_constitution(),
                       intelligence_mod=other.get_intelligence(), wisdom_mod=other.get_wisdom(), charisma_mod=other.get_charisma(),
@@ -213,8 +213,8 @@ class Combatant:
     def is_hp_max(self):
         return self._current_hp == self._max_hp
 
-    def get_hit_dice(self):
-        return self._hit_dice
+    # def get_hit_dice(self):
+    #     return self._hit_dice
 
     def get_speed(self):
         return self._speed
@@ -465,6 +465,12 @@ class Creature(Combatant):
         if not isinstance(self._cr, (int, float)) or self._cr <= 0:
             raise ValueError("Challenge rating must be a non-negative number")
         self._xp = kwargs.get("xp", cr_to_xp(self._cr))
+        saving_throws = kwargs.get("saving_throws")
+        for key in saving_throws:
+            if key not in ["strength", "dexterity", "constitution", "wisdom", "intelligence", "charisma"] \
+                or not isinstance(saving_throws[key], int):
+                raise ValueError("Saving throws must be integers for any of the six ability scores")  # TODO: improve error message
+        self._saving_throws.update(saving_throws)
 
     def copy_constructor(self, other, name="", cr=0, xp=0):
         super().copy_constructor(other, name)
