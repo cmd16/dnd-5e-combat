@@ -106,6 +106,12 @@ class Attack:
         else:
             raise ValueError("Attack mod must be an integer")
 
+    def set_damage_mod(self, damage_mod):
+        if isinstance(damage_mod, int):
+            self._damage_mod = damage_mod
+        else:
+            raise ValueError("Damage mod must be an integer")
+
     def roll_attack(self, adv=0):  # adv is the additional advantage afforded by circumstance
         return roll_dice(20, adv=calc_advantage([self._adv, adv]), modifier=self._attack_mod, critable=True)
 
@@ -275,7 +281,7 @@ class Spell(Attack):
     def make_attack(self, source, target, adv=0, level=None):
         if level is None:
             level = self._level
-        if source.get_level_spell_slots(level) or level == 0:
+        if source.get_level_slots(level) or level == 0:
             source.spend_slot(level)  # TODO: check cantrip logic
         else:
             if source.get_verbose():
@@ -288,4 +294,28 @@ class SavingThrowSpell(Spell, SavingThrowAttack):
                  dc=None, save_type="", damage_on_success=False, damage_dice=None, damage_mod=0,
                  damage_type="", range=0, melee_range=0, adv=0, name="", copy=None"""
     def __init__(self, **kwargs):
+        copy = kwargs.get("copy")
+        if copy:
+            self.copy_constructor(copy, kwargs.get("name"))
+            return
         super().__init__(**kwargs)
+    def copy_constructor(self, other, name=""):
+        super().copy_constructor(other, name)
+
+class HealingSpell(Spell):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    def make_attack(self, source, target, adv=0, level=None):
+        verbose = source.get_verbose()
+        if level is None:
+            level = self._level
+        if source.get_level_slots(level) or level == 0:
+            source.spend_slot(level)  # TODO: check cantrip logic
+        else:
+            if verbose:
+                print("%s tried to cast a level %d spell even though they have no slots left for it" % (source.get_name(), level))
+            return False
+        if verbose:
+            print("%s heals %s." % (source.get_name(), target.get_name()))
+        healing = self.roll_damage()
+        target.take_healing(healing)

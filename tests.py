@@ -389,6 +389,21 @@ def test_spellcaster():
     assert(s0.get_spell_slots() == {1:3, 2:2, 3:1})
     assert(spell0 in s0.get_spells())
     assert(spell0.get_attack_mod() == 5)
+    s1 = combatant.SpellCaster(copy=s0)
+    assert (s1.get_spell_ability() == "wisdom")
+    assert (s1.get_spell_ability_mod() == 3)
+    assert (s1.get_spell_save_dc() == 13)
+    assert (s1.get_spell_attack_mod() == 5)
+    assert (s1.get_level_slots(1) == 3)
+    assert (s1.get_level_slots(2) == 2)
+    assert (s1.get_level_slots(3) == 1)
+    assert (s1.get_level_slots(4) == 0)
+    s1.spend_slot(3)
+    assert (not s1.get_level_slots(3))
+    s1.reset_slots()
+    assert (s1.get_spell_slots() == {1: 3, 2: 2, 3: 1})
+    assert (s1.get_spells()[0].get_attack_mod() == 5)
+    assert(s1 is not s0)
 
 def test_weapon():
     print("Testing Weapon")
@@ -693,14 +708,14 @@ def test_saving_throw_attack():
     assert(sunburn_2.get_damage_type() == "radiant")
     assert(sunburn_2.get_name() == "Sunburn")
     sunburn_3 = attack_class.SavingThrowAttack(copy=sunburn_2)
-    assert (sunburn_3.get_damage_dice() == (1, 8))
-    assert (sunburn_3.get_dc() == 12)
-    assert (sunburn_3.get_save_type() == "dexterity")
-    assert (not sunburn_3.get_damage_on_success())
-    assert (sunburn_3.get_attack_mod() == 0)
-    assert (sunburn_3.get_damage_mod() == 0)
-    assert (sunburn_3.get_damage_type() == "radiant")
-    assert (sunburn_3.get_name() == "Sunburn")
+    assert(sunburn_3.get_damage_dice() == (1, 8))
+    assert(sunburn_3.get_dc() == 12)
+    assert(sunburn_3.get_save_type() == "dexterity")
+    assert(not sunburn_3.get_damage_on_success())
+    assert(sunburn_3.get_attack_mod() == 0)
+    assert(sunburn_3.get_damage_mod() == 0)
+    assert(sunburn_3.get_damage_type() == "radiant")
+    assert(sunburn_3.get_name() == "Sunburn")
 
     t2.add_attack(sunburn_2)
     t2_attacks = t2.get_attacks()
@@ -751,6 +766,38 @@ def test_saving_throw_spell():
     assert(sunburn0.get_damage_type() == "radiant")
     assert(sunburn0.get_name() == "Sunburn")
 
+    s0 = combatant.SpellCaster(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='darkvision',
+                               strength=14, dexterity=11, constitution=9, intelligence=12, wisdom=16, charisma=8,
+                               name="s0", spell_ability="wisdom", spell_slots={1: 3, 2: 2, 3: 1}, proficiency_mod=2,
+                               spells=[sunburn0], verbose=True)
+    s1 = combatant.SpellCaster(copy=s0, name="s1")
+    sunburn1 = s1.get_spells()[0]
+    for i in range(30):
+        s0.send_attack(s1, sunburn0)
+        if s1.has_condition("unconscious") or s1.has_condition("dead"):
+            break
+        s1.send_attack(s0, sunburn1)
+        if s0.has_condition("unconscious") or s0.has_condition("dead"):
+            break
 
-test_attack()
-test_spell()
+def test_healing_spell():
+    t0 = combatant.Combatant(ac=12, max_hp=70, current_hp=5, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             proficiencies=["dexterity", "charisma"], proficiency_mod=2, name='t0', verbose=True)
+    t1 = combatant.Combatant(ac=12, max_hp=70, current_hp=0, temp_hp=2, hit_dice='3d6', speed=20, vision='darkvision',
+                             strength=14, dexterity=16, constitution=9, intelligence=12, wisdom=11, charisma=8,
+                             proficiencies=["dexterity", "charisma"], proficiency_mod=2, name='t1', verbose=True)
+    cure_wounds = attack_class.HealingSpell(damage_dice=(1,8), level=1, casting_time="1 action", components=["v", "s"],
+                                            duration="instantaneous", name="Cure Wounds")
+    s0 = combatant.SpellCaster(ac=18, max_hp=70, current_hp=60, temp_hp=2, hit_dice='4d10', speed=30, vision='darkvision',
+                                strength=14, dexterity=11, constitution=9, intelligence=12, wisdom=16, charisma=8,
+                               name="s0", spell_ability="wisdom", spell_slots={1: 30}, proficiency_mod=2,
+                               spells=[cure_wounds], verbose=True)
+    targets = [t0, t1]
+    for i in range(30):
+        target = random.choice(targets)
+        s0.send_attack(target=target, attack=cure_wounds)
+        if t0.is_hp_max() or t1.is_hp_max():
+            break
+
+test_healing_spell()

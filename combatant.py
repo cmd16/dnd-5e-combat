@@ -30,6 +30,10 @@ class Combatant:
             self.copy_constructor(combatant_copy, name=kwargs.get("name"))
             return
 
+        self._name = kwargs.get('name')
+        if not self._name:
+            raise ValueError("Must provide a name")
+
         self._verbose = kwargs.get("verbose", False)
 
         self._ac = kwargs.get('ac')
@@ -166,10 +170,6 @@ class Combatant:
 
         self._items = kwargs.get('items', [])  # TODO: implement
 
-        self._name = kwargs.get('name')
-        if not self._name:
-            raise ValueError("Must provide a name")
-
     def copy_constructor(self, other, name=""):
         """
         Sets instance variables from another Combatant. Warning: this overrides any existing values in self.
@@ -209,6 +209,9 @@ class Combatant:
 
     def is_bloodied(self):
         return self._current_hp <= self._max_hp
+
+    def is_hp_max(self):
+        return self._current_hp == self._max_hp
 
     def get_hit_dice(self):
         return self._hit_dice
@@ -397,7 +400,7 @@ class Combatant:
     def send_attack(self, target, attack, adv=0):
         try:
             attack.make_attack(self, target, adv=adv)
-        except:
+        except NameError:
             raise ValueError("%s tried to make an attack with something that can't make attacks" % self._name)
 
     def take_attack(self, attack_result):
@@ -434,7 +437,7 @@ class Combatant:
     def take_healing(self, healing):
         self._current_hp = min(self._current_hp + healing, self._max_hp)
         if self._verbose:
-            print("%s is healed for %d" % (self._name, healing), end=" ")
+            print("%s is healed for %d." % (self._name, healing))
         if self.has_condition("unconscious"):
             self.remove_condition("unconscious")
 
@@ -555,7 +558,6 @@ class SpellCaster(Combatant):
                 except ValueError:
                     raise ValueError("Spells must contain only Spell objects")
 
-
     def copy_constructor(self, other, **kwargs):
         super().copy_constructor(other, name=kwargs.get("name"))
         if isinstance(other, SpellCaster):
@@ -565,9 +567,11 @@ class SpellCaster(Combatant):
             self._spell_attack_mod = other.get_spell_attack_mod()
             self._spell_slots = dict()
             self._spell_slots.update(other.get_spell_slots())
+            self._full_spell_slots = dict()
+            self._full_spell_slots.update(self._spell_slots)
             self._spells = []
             for spell in other.get_spells():
-                new_spell = attack_class.Spell(copy=spell)
+                new_spell = type(spell)(copy=spell)  # makes sure we get the right kind of spell
                 self._spells.append(new_spell)
         else:
             spell_ability = kwargs.get("spell_ability", "intelligence")
@@ -630,12 +634,16 @@ class SpellCaster(Combatant):
 
     def add_spell(self, spell):
         if isinstance(spell, attack_class.Spell):
+            if isinstance(spell, attack_class.HealingSpell):
+                spell.set_damage_mod(self._spell_ability_mod)
             spell.set_attack_mod(self._spell_attack_mod)
             self._spells.append(spell)
         else:
             raise ValueError("Cannot add a non-Spell object as an attack.")
 
     def spend_slot(self, level):
+        if level == 0:
+            return  # don't spend a slot
         if not isinstance(level, int) or not (0 < level < 10):
             raise ValueError("Level must be an int between 1 and 9")
         try:
